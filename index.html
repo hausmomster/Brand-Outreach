@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Brand Outreach Hub — Lejla Krstic</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .hero {
+      padding: 100px 0 60px;
+      border-bottom: 1px solid var(--border);
+    }
+    .hero-sub {
+      font-size: 14px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-mid);
+      margin-bottom: 18px;
+    }
+    .hero h1 {
+      font-size: 64px;
+      line-height: 1.05;
+      margin-bottom: 20px;
+    }
+    .hero h1 em { font-style: italic; color: var(--gold); }
+    .hero-desc {
+      font-size: 17px;
+      color: var(--text-mid);
+      max-width: 540px;
+      line-height: 1.7;
+    }
+    .hero-actions { margin-top: 36px; display: flex; gap: 12px; flex-wrap: wrap; }
+
+    /* stats strip */
+    .stats-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border-bottom: 1px solid var(--border);
+    }
+    .stat-cell {
+      padding: 32px 40px;
+      border-right: 1px solid var(--border);
+    }
+    .stat-cell:last-child { border-right: none; }
+    .stat-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 40px;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .stat-label {
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-mid);
+    }
+
+    /* nav tiles */
+    .nav-tiles {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      margin: 60px 0;
+      gap: 24px;
+    }
+    .nav-tile {
+      border: 1px solid var(--border);
+      padding: 40px 36px;
+      display: flex;
+      flex-direction: column;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+    }
+    .nav-tile:hover {
+      border-color: var(--gold);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+    }
+    .tile-icon {
+      font-size: 28px;
+      margin-bottom: 20px;
+      opacity: 0.8;
+    }
+    .tile-label {
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 10px;
+    }
+    .tile-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 26px;
+      margin-bottom: 12px;
+    }
+    .tile-desc {
+      font-size: 14px;
+      color: var(--text-mid);
+      line-height: 1.6;
+      flex: 1;
+    }
+    .tile-cta {
+      margin-top: 28px;
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-mid);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-tile:hover .tile-cta { color: var(--gold); }
+
+    /* recent activity */
+    .activity-section { padding: 0 0 80px; }
+    .activity-row {
+      display: flex;
+      align-items: center;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+      gap: 16px;
+    }
+    .activity-brand {
+      font-weight: 500;
+      min-width: 160px;
+    }
+    .activity-status { min-width: 100px; }
+    .activity-date {
+      font-size: 13px;
+      color: var(--text-light);
+      margin-left: auto;
+    }
+    .activity-empty {
+      padding: 40px 0;
+      color: var(--text-light);
+      font-size: 14px;
+      text-align: center;
+    }
+
+    @media (max-width: 900px) {
+      .hero h1 { font-size: 44px; }
+      .stats-strip { grid-template-columns: repeat(2, 1fr); }
+      .stat-cell:nth-child(2) { border-right: none; }
+      .nav-tiles { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" class="nav-brand">Lejla <span>Krstic</span></a>
+  <div class="nav-links">
+    <a href="index.html" class="active">Hub</a>
+    <a href="media-kit.html">Media Kit</a>
+    <a href="brands.html">Brands</a>
+    <a href="outreach.html">Outreach</a>
+  </div>
+</nav>
+
+<div class="page-wrap">
+
+  <section class="hero">
+    <div class="container">
+      <p class="hero-sub">@haus_momster · Brand Outreach Hub</p>
+      <h1>Your brand<br>partnership <em>workspace</em></h1>
+      <p class="hero-desc">
+        Discover aligned brands, send beautifully crafted outreach emails,
+        and track every partnership opportunity — all in one place.
+      </p>
+      <div class="hero-actions">
+        <a href="brands.html" class="btn btn-primary">Discover Brands</a>
+        <a href="outreach.html" class="btn btn-outline">View Pipeline</a>
+        <a href="media-kit.html" target="_blank" class="btn btn-ghost">↗ Share Media Kit</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="stats-strip" id="statsStrip">
+    <div class="stat-cell">
+      <div class="stat-num" id="stat-brands">—</div>
+      <div class="stat-label">Brands Tracked</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-num" id="stat-sent">—</div>
+      <div class="stat-label">Emails Sent</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-num" id="stat-replied">—</div>
+      <div class="stat-label">Replies Received</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-num" id="stat-partners">—</div>
+      <div class="stat-label">Active Partnerships</div>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <div class="nav-tiles">
+      <a href="media-kit.html" class="nav-tile" target="_blank">
+        <div class="tile-icon">✦</div>
+        <div class="tile-label">Share</div>
+        <div class="tile-title">Media Kit</div>
+        <div class="tile-desc">Your shareable digital media kit — stats, services, and pricing beautifully presented for brand partners.</div>
+        <div class="tile-cta">Open media kit →</div>
+      </a>
+      <a href="brands.html" class="nav-tile">
+        <div class="tile-icon">◎</div>
+        <div class="tile-label">Discover</div>
+        <div class="tile-title">Brand Library</div>
+        <div class="tile-desc">Curated list of brands aligned with your aesthetic — premium home, kitchen, lighting, lifestyle, and more.</div>
+        <div class="tile-cta">Browse brands →</div>
+      </a>
+      <a href="outreach.html" class="nav-tile">
+        <div class="tile-icon">→</div>
+        <div class="tile-label">Track</div>
+        <div class="tile-title">Outreach Pipeline</div>
+        <div class="tile-desc">Manage your brand relationships from first draft to signed partnership. Generate personalised emails in seconds.</div>
+        <div class="tile-cta">Open pipeline →</div>
+      </a>
+    </div>
+
+    <div class="activity-section">
+      <div class="flex-between mb-24">
+        <h2 style="font-size:28px;">Recent Activity</h2>
+        <a href="outreach.html" class="btn btn-ghost">View all →</a>
+      </div>
+      <div id="activityList">
+        <div class="activity-empty">No outreach yet — head to Brands to get started.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  function loadStats() {
+    const outreach = JSON.parse(localStorage.getItem('outreach') || '[]');
+    document.getElementById('stat-brands').textContent = outreach.length || '0';
+    document.getElementById('stat-sent').textContent =
+      outreach.filter(o => ['sent','followed_up','replied','negotiating','partnership'].includes(o.status)).length || '0';
+    document.getElementById('stat-replied').textContent =
+      outreach.filter(o => ['replied','negotiating','partnership'].includes(o.status)).length || '0';
+    document.getElementById('stat-partners').textContent =
+      outreach.filter(o => o.status === 'partnership').length || '0';
+
+    const list = document.getElementById('activityList');
+    if (!outreach.length) return;
+
+    const recent = [...outreach]
+      .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+      .slice(0, 6);
+
+    list.innerHTML = recent.map(o => {
+      const statusMap = {
+        new: ['New', 'badge-new'],
+        drafted: ['Drafted', 'badge-drafted'],
+        sent: ['Sent', 'badge-sent'],
+        followed_up: ['Followed Up', 'badge-sent'],
+        replied: ['Replied', 'badge-replied'],
+        negotiating: ['Negotiating', 'badge-nego'],
+        partnership: ['Partnership ✓', 'badge-partner'],
+        declined: ['Declined', 'badge-declined'],
+      };
+      const [label, cls] = statusMap[o.status] || ['—', 'badge-new'];
+      const date = o.updatedAt ? new Date(o.updatedAt).toLocaleDateString('en-GB', {day:'numeric',month:'short'}) : '';
+      return `<div class="activity-row">
+        <span class="activity-brand">${o.brandName}</span>
+        <span class="activity-status"><span class="badge ${cls}">${label}</span></span>
+        <span class="activity-date">${date}</span>
+      </div>`;
+    }).join('');
+  }
+
+  loadStats();
+</script>
+</body>
+</html>

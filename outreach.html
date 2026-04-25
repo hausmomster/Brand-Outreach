@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Outreach Pipeline — Haus Momster</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .page-header {
+      padding: 60px 0 40px;
+      border-bottom: 1px solid var(--border);
+    }
+    .pipeline-summary {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      border-bottom: 1px solid var(--border);
+    }
+    .pipeline-col {
+      padding: 20px 16px;
+      border-right: 1px solid var(--border);
+      text-align: center;
+    }
+    .pipeline-col:last-child { border-right: none; }
+    .pipeline-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 32px;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .pipeline-label {
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-mid);
+    }
+
+    /* table */
+    .outreach-table-wrap {
+      overflow-x: auto;
+      margin-top: 32px;
+    }
+    .outreach-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .outreach-table th {
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-light);
+      font-weight: 500;
+      padding: 10px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    .outreach-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    .outreach-table tbody tr:hover { background: var(--surface); }
+    .brand-cell-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 18px;
+      margin-bottom: 2px;
+      white-space: nowrap;
+    }
+    .brand-cell-cat {
+      font-size: 11px;
+      color: var(--text-light);
+    }
+    .notes-cell {
+      font-size: 13px;
+      color: var(--text-mid);
+      max-width: 220px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .date-cell {
+      font-size: 12px;
+      color: var(--text-light);
+      white-space: nowrap;
+    }
+    .actions-cell { white-space: nowrap; }
+    .action-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-mid);
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-family: 'Jost', sans-serif;
+      transition: all 0.15s;
+      margin-right: 4px;
+    }
+    .action-btn:hover { border-color: var(--gold); color: var(--text); }
+    .action-btn.danger:hover { border-color: var(--rose); color: var(--rose); }
+
+    .status-select {
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      padding: 4px 8px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      outline: none;
+      cursor: pointer;
+      font-family: 'Jost', sans-serif;
+      appearance: none;
+      padding-right: 20px;
+    }
+    .status-wrap { position: relative; }
+    .status-wrap::after {
+      content: '▾';
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 10px;
+      color: var(--text-light);
+      pointer-events: none;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+    }
+    .empty-state h3 {
+      font-size: 28px;
+      margin-bottom: 12px;
+      color: var(--text-mid);
+    }
+    .empty-state p {
+      font-size: 15px;
+      color: var(--text-light);
+      margin-bottom: 24px;
+    }
+
+    /* Email template modal */
+    .template-modal .modal { max-width: 780px; }
+    .template-tabs {
+      display: flex;
+      gap: 0;
+      border: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+    .template-tab {
+      padding: 10px 20px;
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      background: none;
+      border: none;
+      border-right: 1px solid var(--border);
+      color: var(--text-mid);
+      cursor: pointer;
+      font-family: 'Jost', sans-serif;
+      transition: all 0.15s;
+    }
+    .template-tab:last-child { border-right: none; }
+    .template-tab.active { background: var(--text); color: var(--bg); }
+    .template-tab:hover:not(.active) { background: var(--surface); }
+
+    .email-preview {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 28px 32px;
+      font-size: 14px;
+      line-height: 1.8;
+      color: var(--text);
+      white-space: pre-wrap;
+      font-family: 'Jost', sans-serif;
+      max-height: 400px;
+      overflow-y: auto;
+      position: relative;
+    }
+    .email-subject {
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-mid);
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .followup-due {
+      color: var(--rose);
+      font-size: 11px;
+      letter-spacing: 0.04em;
+    }
+    .followup-ok {
+      color: var(--sage);
+      font-size: 11px;
+    }
+
+    @media (max-width: 900px) {
+      .pipeline-summary { grid-template-columns: repeat(4, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" class="nav-brand">Lejla <span>Krstic</span></a>
+  <div class="nav-links">
+    <a href="index.html">Hub</a>
+    <a href="media-kit.html" target="_blank">Media Kit</a>
+    <a href="brands.html">Brands</a>
+    <a href="outreach.html" class="active">Outreach</a>
+  </div>
+</nav>
+
+<div class="page-wrap">
+  <div class="page-header">
+    <div class="container">
+      <div class="flex-between">
+        <div>
+          <p class="eyebrow">Pipeline</p>
+          <h1 class="section-title">Outreach Tracker</h1>
+          <p style="color:var(--text-mid);font-size:15px;margin-top:4px;">
+            Track every brand relationship from first idea to signed partnership.
+          </p>
+        </div>
+        <a href="brands.html" class="btn btn-primary">+ Add Brands</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="pipeline-summary" id="pipelineSummary">
+    <div class="pipeline-col"><div class="pipeline-num" id="cnt-new">0</div><div class="pipeline-label">New</div></div>
+    <div class="pipeline-col"><div class="pipeline-num" id="cnt-drafted">0</div><div class="pipeline-label">Drafted</div></div>
+    <div class="pipeline-col"><div class="pipeline-num" id="cnt-sent">0</div><div class="pipeline-label">Sent</div></div>
+    <div class="pipeline-col"><div class="pipeline-num" id="cnt-followed_up">0</div><div class="pipeline-label">Followed Up</div></div>
+    <div class="pipeline-col"><div class="pipeline-num" id="cnt-replied">0</div><div class="pipeline-label">Replied</div></div>
+    <div class="pipeline-col"><div class="pipeline-num" id="cnt-negotiating">0</div><div class="pipeline-label">Negotiating</div></div>
+    <div class="pipeline-col"><div class="pipeline-num" id="cnt-partnership" style="color:var(--sage)">0</div><div class="pipeline-label">Partnership ✓</div></div>
+  </div>
+
+  <div class="container">
+    <div id="mainContent">
+      <!-- rendered by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- EMAIL TEMPLATE MODAL -->
+<div class="modal-overlay template-modal" id="templateModal">
+  <div class="modal" style="max-width:780px;">
+    <button class="modal-close" onclick="closeTemplateModal()">×</button>
+    <div class="modal-title" id="tmpl-brand-name"></div>
+    <p style="color:var(--text-mid);font-size:13px;margin-bottom:20px;" id="tmpl-hint"></p>
+    <div class="template-tabs" id="tmplTabs">
+      <button class="template-tab active" data-tmpl="initial" onclick="switchTemplate('initial', this)">Initial Outreach</button>
+      <button class="template-tab" data-tmpl="followup" onclick="switchTemplate('followup', this)">Follow-up</button>
+      <button class="template-tab" data-tmpl="brief" onclick="switchTemplate('brief', this)">Collaboration Brief</button>
+    </div>
+    <div id="emailPreviewWrap">
+      <div class="email-subject" id="emailSubject"></div>
+      <div class="email-preview" id="emailPreview"></div>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:16px;">
+      <button class="btn btn-gold w-full" onclick="copyEmail()">Copy Email</button>
+      <button class="btn btn-outline" onclick="closeTemplateModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT NOTES MODAL -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeEditModal()">×</button>
+    <div class="modal-title" id="editBrandName"></div>
+    <div class="form-group mt-16">
+      <label class="form-label">Contact Email</label>
+      <input type="email" class="form-control" id="editEmail">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Follow-up Reminder Date</label>
+      <input type="date" class="form-control" id="editFollowup">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <textarea class="form-control" id="editNotes" rows="4"></textarea>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:8px;">
+      <button class="btn btn-primary w-full" onclick="saveEdit()">Save</button>
+      <button class="btn btn-outline" onclick="closeEditModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STATUS CONFIG ──────────────────────────────────────
+const STATUSES = [
+  { value: 'new',         label: 'New',          cls: 'badge-new' },
+  { value: 'drafted',     label: 'Drafted',      cls: 'badge-drafted' },
+  { value: 'sent',        label: 'Sent',         cls: 'badge-sent' },
+  { value: 'followed_up', label: 'Followed Up',  cls: 'badge-sent' },
+  { value: 'replied',     label: 'Replied',      cls: 'badge-replied' },
+  { value: 'negotiating', label: 'Negotiating',  cls: 'badge-nego' },
+  { value: 'partnership', label: 'Partnership ✓',cls: 'badge-partner' },
+  { value: 'declined',    label: 'Declined',     cls: 'badge-declined' },
+];
+
+// ── EMAIL TEMPLATES ────────────────────────────────────
+const TEMPLATES = {
+  initial: {
+    subject: (brand) => `Collaboration Inquiry — @haus_momster x ${brand.brandName}`,
+    body: (brand) => {
+      const typeLines = {
+        "outdoor-cooking": `My husband and I deeply value the feeling of home and community — especially our outdoor gatherings and pizza evenings, which resonate authentically with my audience.`,
+        "kitchen-appliance": `The kitchen is the heart of the home — and the way appliances are designed directly shapes how a space feels and functions. That intersection is central to my work.`,
+        "cookware": `Cookware is where design and function truly meet — beautiful objects that are used, touched, and lived with every day. That authenticity is what my audience connects with.`,
+        "furniture": `Furniture defines the architecture of daily life. I believe in showing pieces within real, designed environments rather than staged settings — the way an object genuinely shapes a room.`,
+        "lighting": `Light is the most transformative element in any interior. The right fixture doesn't just illuminate — it defines the entire atmosphere of a space.`,
+        "materials": `Surfaces and materials form the foundation of every interior I design. The tactile, visual quality of materials is something my audience has a deep appreciation for.`,
+        "outdoor": `Outdoor spaces deserve the same design intentionality as interiors. The materials, objects, and atmosphere of an outdoor space can be just as transformative.`,
+        "lifestyle": `Objects of everyday use — the ones we reach for each morning — say something profound about how we choose to live. That considered approach resonates deeply with my community.`,
+        "tableware": `The table is one of the most social and atmospheric spaces in a home. The objects on it — glassware, ceramics, cutlery — are as much design as they are functional.`,
+        "art": `Art is perhaps the most personal element of an interior — the thing that most reveals a person's sensibility and transforms a space into a home.`,
+        "platform": `As an interior designer and content creator, I curate carefully — and my audience trusts that curation. I'm interested in genuine partnerships with brands that align with that trust.`,
+      };
+      const personalLine = typeLines[brand.templateType] || `Your brand's commitment to quality and design language is something I genuinely admire.`;
+
+      return `Dear ${brand.brandName} Team,
+
+I hope this message finds you well.
+
+My name is Lejla Krstic, and I'm an interior designer and content creator at @haus_momster — a community of 45,000 design-focused followers, primarily based in the DACH region. My work centres on creating refined, atmospheric spaces that balance materiality, light, and function: real environments that tell a story.
+
+I've been following ${brand.brandName} and am genuinely drawn to how you approach [design / quality / craft]. ${personalLine}
+
+I would love to explore a collaboration that integrates your product into a fully styled, designed context — concept-led rather than product-led. My focus would be on:
+
+   — Editorial-style content within a curated, designed setting
+   — Close-up details highlighting materials and craftsmanship
+   — Natural integration into a genuine lifestyle moment
+   — High-quality imagery you are welcome to use for your own channels
+
+In addition to sharing the content with my audience, I would be happy to provide you with a curated set of images for your own marketing and communication channels.
+
+If this resonates with how you approach creative partnerships, I would love to discuss ideas and possibilities further.
+
+Please find attached my media kit with full details on reach, audience, services, and pricing — or view it online: [Your Media Kit URL]
+
+Thank you for your time and consideration.
+
+Warm regards,
+Lejla Krstic
+Interior Designer & Content Creator
+@haus_momster
+
+E: lejla@conceptdistrict.com
+T: +49 163 798 4021`;
+    }
+  },
+  followup: {
+    subject: (brand) => `Following Up — @haus_momster x ${brand.brandName}`,
+    body: (brand) => `Dear ${brand.brandName} Team,
+
+I wanted to follow up on the collaboration enquiry I sent recently — I appreciate how busy things can get and wanted to make sure it didn't slip through the cracks.
+
+I remain very interested in exploring a creative partnership with ${brand.brandName} and would love to find a format that works well for both of us.
+
+If it would help to jump on a short call to discuss ideas, I'm happy to arrange that at your convenience.
+
+Looking forward to hearing from you.
+
+Warm regards,
+Lejla Krstic
+@haus_momster
+
+E: lejla@conceptdistrict.com
+T: +49 163 798 4021`
+  },
+  brief: {
+    subject: (brand) => `Creative Brief — @haus_momster x ${brand.brandName} Collaboration`,
+    body: (brand) => `Dear ${brand.brandName} Team,
+
+Thank you for your interest in collaborating — I'm excited to take this further.
+
+Below is a brief outline of how I would approach a partnership with you:
+
+CREATIVE CONCEPT
+I would integrate your product into a fully designed setting — drawing from an ongoing residential project or my own curated spaces. The content would feel editorial and lived-in, not produced.
+
+CONTENT DELIVERABLES
+   — 1 × Instagram Reel (up to 45 sec) — atmospheric, concept-led
+   — 1 × Carousel Post (5 slides) — detail, context, material close-ups
+   — Story Set — behind-the-scenes and direct product access
+
+USAGE RIGHTS
+All content will be available for your own channels. Usage rights for paid advertising can be added (refer to media kit for pricing).
+
+TIMELINE
+I'd suggest a 3–4 week production window from product delivery to publishing.
+
+INVESTMENT
+Referring to the enclosed media kit for full pricing. Open to discussing a tailored package.
+
+MEDIA KIT
+[Your Media Kit URL]
+
+Please let me know if this outline works for you — I'm happy to refine the brief together.
+
+Warm regards,
+Lejla Krstic
+@haus_momster
+
+E: lejla@conceptdistrict.com
+T: +49 163 798 4021`
+  }
+};
+
+// ── STATE ──────────────────────────────────────────────
+let editingId = null;
+let templateEntry = null;
+let currentTemplateKey = 'initial';
+
+function getOutreach() {
+  return JSON.parse(localStorage.getItem('outreach') || '[]');
+}
+
+function saveOutreach(data) {
+  localStorage.setItem('outreach', JSON.stringify(data));
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ── RENDER ─────────────────────────────────────────────
+function render() {
+  const outreach = getOutreach();
+
+  // Pipeline summary counts
+  STATUSES.forEach(s => {
+    const el = document.getElementById('cnt-' + s.value);
+    if (el) el.textContent = outreach.filter(o => o.status === s.value).length;
+  });
+
+  const main = document.getElementById('mainContent');
+
+  if (!outreach.length) {
+    main.innerHTML = `<div class="empty-state">
+      <h3>No outreach yet</h3>
+      <p>Head to the Brand Library to discover brands aligned with your aesthetic<br>and add them to your pipeline.</p>
+      <a href="brands.html" class="btn btn-primary">Browse Brands →</a>
+    </div>`;
+    return;
+  }
+
+  const sorted = [...outreach].sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+  const today = new Date().toISOString().split('T')[0];
+
+  const statusOptions = STATUSES.map(s =>
+    `<option value="${s.value}">${s.label}</option>`
+  ).join('');
+
+  main.innerHTML = `
+    <div class="outreach-table-wrap">
+      <table class="outreach-table">
+        <thead>
+          <tr>
+            <th>Brand</th>
+            <th>Status</th>
+            <th>Contact</th>
+            <th>Follow-up</th>
+            <th>Notes</th>
+            <th>Added</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${sorted.map(entry => {
+            const statusCfg = STATUSES.find(s => s.value === entry.status) || STATUSES[0];
+            const addedDate = entry.addedDate
+              ? new Date(entry.addedDate).toLocaleDateString('en-GB', { day:'numeric', month:'short' })
+              : '—';
+            const followupHtml = entry.followUpDate
+              ? `<span class="${entry.followUpDate < today ? 'followup-due' : 'followup-ok'}">
+                  ${entry.followUpDate < today ? '⚑ ' : '◎ '}${new Date(entry.followUpDate + 'T12:00:00').toLocaleDateString('en-GB', {day:'numeric', month:'short'})}
+                </span>`
+              : '<span style="color:var(--text-light);font-size:12px;">—</span>';
+
+            return `<tr>
+              <td>
+                <div class="brand-cell-name">${entry.brandName}</div>
+                <div class="brand-cell-cat">${entry.brandCategory || ''} ${entry.brandCountry || ''}</div>
+              </td>
+              <td>
+                <div class="status-wrap">
+                  <select class="status-select" onchange="updateStatus('${entry.id}', this.value)">
+                    ${STATUSES.map(s => `<option value="${s.value}"${s.value === entry.status ? ' selected' : ''}>${s.label}</option>`).join('')}
+                  </select>
+                </div>
+              </td>
+              <td>
+                <span style="font-size:13px;color:var(--text-mid);">${entry.contactEmail || '<span style="color:var(--text-light)">—</span>'}</span>
+              </td>
+              <td>${followupHtml}</td>
+              <td>
+                <span class="notes-cell" title="${(entry.notes || '').replace(/"/g, '&quot;')}">${entry.notes || '<span style="color:var(--text-light)">—</span>'}</span>
+              </td>
+              <td><span class="date-cell">${addedDate}</span></td>
+              <td class="actions-cell">
+                <button class="action-btn" onclick="openTemplateModal('${entry.id}')">✉ Email</button>
+                <button class="action-btn" onclick="openEditModal('${entry.id}')">Edit</button>
+                <button class="action-btn danger" onclick="deleteEntry('${entry.id}')">✕</button>
+              </td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+// ── STATUS UPDATE ──────────────────────────────────────
+function updateStatus(id, value) {
+  const outreach = getOutreach();
+  const idx = outreach.findIndex(o => o.id === id);
+  if (idx === -1) return;
+  outreach[idx].status = value;
+  outreach[idx].updatedAt = new Date().toISOString();
+  if (value === 'sent' && !outreach[idx].sentDate) {
+    outreach[idx].sentDate = new Date().toISOString();
+  }
+  saveOutreach(outreach);
+  render();
+}
+
+// ── DELETE ─────────────────────────────────────────────
+function deleteEntry(id) {
+  const outreach = getOutreach();
+  const entry = outreach.find(o => o.id === id);
+  if (!entry) return;
+  if (!confirm(`Remove ${entry.brandName} from pipeline?`)) return;
+  saveOutreach(outreach.filter(o => o.id !== id));
+  render();
+  showToast(`${entry.brandName} removed`);
+}
+
+// ── EDIT MODAL ─────────────────────────────────────────
+function openEditModal(id) {
+  const outreach = getOutreach();
+  const entry = outreach.find(o => o.id === id);
+  if (!entry) return;
+  editingId = id;
+  document.getElementById('editBrandName').textContent = entry.brandName;
+  document.getElementById('editEmail').value = entry.contactEmail || '';
+  document.getElementById('editFollowup').value = entry.followUpDate || '';
+  document.getElementById('editNotes').value = entry.notes || '';
+  document.getElementById('editModal').classList.add('open');
+}
+
+function closeEditModal() {
+  document.getElementById('editModal').classList.remove('open');
+  editingId = null;
+}
+
+function saveEdit() {
+  const outreach = getOutreach();
+  const idx = outreach.findIndex(o => o.id === editingId);
+  if (idx === -1) return;
+  outreach[idx].contactEmail = document.getElementById('editEmail').value.trim();
+  outreach[idx].followUpDate = document.getElementById('editFollowup').value;
+  outreach[idx].notes = document.getElementById('editNotes').value.trim();
+  outreach[idx].updatedAt = new Date().toISOString();
+  saveOutreach(outreach);
+  closeEditModal();
+  render();
+  showToast('Saved');
+}
+
+// ── TEMPLATE MODAL ─────────────────────────────────────
+function openTemplateModal(id) {
+  const outreach = getOutreach();
+  templateEntry = outreach.find(o => o.id === id);
+  if (!templateEntry) return;
+  document.getElementById('tmpl-brand-name').textContent = templateEntry.brandName;
+  document.getElementById('tmpl-hint').textContent =
+    templateEntry.emailHint
+      ? `💡 Tip: ${templateEntry.emailHint}`
+      : 'Personalise the highlighted sections to make it your own.';
+  currentTemplateKey = 'initial';
+  document.querySelectorAll('.template-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.tmpl === 'initial');
+  });
+  renderEmailPreview();
+  document.getElementById('templateModal').classList.add('open');
+}
+
+function closeTemplateModal() {
+  document.getElementById('templateModal').classList.remove('open');
+  templateEntry = null;
+}
+
+function switchTemplate(key, btn) {
+  currentTemplateKey = key;
+  document.querySelectorAll('.template-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderEmailPreview();
+}
+
+function renderEmailPreview() {
+  if (!templateEntry) return;
+  const tmpl = TEMPLATES[currentTemplateKey];
+  if (!tmpl) return;
+  const subject = tmpl.subject(templateEntry);
+  const body = tmpl.body(templateEntry);
+  document.getElementById('emailSubject').textContent = `Subject: ${subject}`;
+  document.getElementById('emailPreview').textContent = body;
+}
+
+function copyEmail() {
+  if (!templateEntry) return;
+  const tmpl = TEMPLATES[currentTemplateKey];
+  const subject = tmpl.subject(templateEntry);
+  const body = tmpl.body(templateEntry);
+  const full = `Subject: ${subject}\n\n${body}`;
+  navigator.clipboard.writeText(full).then(() => {
+    showToast('Copied to clipboard');
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = full;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('Copied to clipboard');
+  });
+}
+
+// Close modals on overlay click
+document.getElementById('templateModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('templateModal')) closeTemplateModal();
+});
+document.getElementById('editModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('editModal')) closeEditModal();
+});
+
+render();
+</script>
+</body>
+</html>

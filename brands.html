@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Brand Library — Haus Momster Outreach</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .page-header {
+      padding: 60px 0 40px;
+      border-bottom: 1px solid var(--border);
+    }
+    .filter-bar {
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: var(--nav-h);
+      background: rgba(253,250,247,0.97);
+      backdrop-filter: blur(8px);
+      z-index: 50;
+    }
+    .filter-bar-inner {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .filter-chips { display: flex; gap: 8px; flex-wrap: wrap; flex: 1; }
+    .chip {
+      padding: 6px 16px;
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-mid);
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: 'Jost', sans-serif;
+    }
+    .chip:hover { border-color: var(--gold); color: var(--text); }
+    .chip.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+    .search-wrap { position: relative; min-width: 220px; }
+    .search-icon {
+      position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+      color: var(--text-light); font-size: 14px; pointer-events: none;
+    }
+    .search-input {
+      width: 100%;
+      padding: 8px 12px 8px 34px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      font-size: 13px;
+      outline: none;
+      color: var(--text);
+    }
+    .search-input:focus { border-color: var(--gold); }
+    .results-count {
+      font-size: 13px;
+      color: var(--text-light);
+      white-space: nowrap;
+    }
+
+    /* brand cards grid */
+    .brands-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      padding: 40px 0 80px;
+    }
+    .brand-card {
+      border: 1px solid var(--border);
+      padding: 0;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+    }
+    .brand-card:hover {
+      border-color: var(--gold);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+    }
+    .brand-card-top {
+      padding: 24px 24px 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    .brand-logo {
+      width: 48px; height: 48px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .brand-meta { flex: 1; }
+    .brand-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .brand-country {
+      font-size: 12px;
+      color: var(--text-light);
+      letter-spacing: 0.04em;
+    }
+    .brand-category-chip {
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      background: var(--surface);
+      color: var(--text-mid);
+      border: 1px solid var(--border);
+    }
+    .brand-card-body {
+      padding: 0 24px 16px;
+      flex: 1;
+    }
+    .brand-desc {
+      font-size: 13px;
+      color: var(--text-mid);
+      line-height: 1.6;
+    }
+    .brand-why {
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--sage);
+      line-height: 1.5;
+      display: flex;
+      gap: 6px;
+    }
+    .brand-why::before {
+      content: '✦';
+      flex-shrink: 0;
+      font-size: 10px;
+      margin-top: 1px;
+    }
+    .fit-dots {
+      display: flex; gap: 3px; margin-top: 12px;
+    }
+    .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--border);
+    }
+    .dot.filled { background: var(--gold); }
+    .brand-card-footer {
+      padding: 14px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .brand-ig {
+      font-size: 12px;
+      color: var(--text-light);
+    }
+    .add-btn {
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-mid);
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: 'Jost', sans-serif;
+      white-space: nowrap;
+    }
+    .add-btn:hover { background: var(--text); color: var(--bg); border-color: var(--text); }
+    .add-btn.added { background: var(--sage); color: #fff; border-color: var(--sage); }
+
+    .no-results {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--text-light);
+      font-size: 15px;
+      grid-column: 1/-1;
+    }
+
+    @media (max-width: 900px) {
+      .brands-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .brands-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" class="nav-brand">Lejla <span>Krstic</span></a>
+  <div class="nav-links">
+    <a href="index.html">Hub</a>
+    <a href="media-kit.html" target="_blank">Media Kit</a>
+    <a href="brands.html" class="active">Brands</a>
+    <a href="outreach.html">Outreach</a>
+  </div>
+</nav>
+
+<div class="page-wrap">
+  <div class="page-header">
+    <div class="container">
+      <p class="eyebrow">Discovery</p>
+      <h1 class="section-title">Brand Library</h1>
+      <p style="color:var(--text-mid);font-size:16px;max-width:540px;">
+        Curated brands aligned with your aesthetic — premium home, kitchen, lighting, outdoor, and lifestyle.
+        Click any brand to add it to your outreach pipeline.
+      </p>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <div class="container">
+      <div class="filter-bar-inner">
+        <div class="filter-chips" id="filterChips">
+          <button class="chip active" data-cat="all">All</button>
+          <button class="chip" data-cat="Kitchen & Cooking">Kitchen</button>
+          <button class="chip" data-cat="Home & Furniture">Furniture</button>
+          <button class="chip" data-cat="Lighting">Lighting</button>
+          <button class="chip" data-cat="Materials & Surfaces">Materials</button>
+          <button class="chip" data-cat="Outdoor & Garden">Outdoor</button>
+          <button class="chip" data-cat="Lifestyle & Fragrance">Lifestyle</button>
+          <button class="chip" data-cat="Tableware & Glass">Tableware</button>
+          <button class="chip" data-cat="Art & Prints">Art</button>
+        </div>
+        <div class="search-wrap">
+          <span class="search-icon">⌕</span>
+          <input type="text" class="search-input" id="searchInput" placeholder="Search brands...">
+        </div>
+        <span class="results-count" id="resultsCount"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="brands-grid" id="brandsGrid"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ADD TO OUTREACH MODAL -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div class="modal-title" id="modalBrandName"></div>
+    <p style="color:var(--text-mid);font-size:14px;margin-bottom:24px;" id="modalBrandDesc"></p>
+    <div class="form-group">
+      <label class="form-label">Contact Email (if known)</label>
+      <input type="email" class="form-control" id="modalEmail" placeholder="press@brand.com">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <textarea class="form-control" id="modalNotes" placeholder="Why this brand, specific product ideas, contact name..."></textarea>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:8px;">
+      <button class="btn btn-primary w-full" onclick="confirmAdd()">Add to Pipeline</button>
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const BRANDS = [
+  // ── Kitchen & Cooking ──────────────────────────────
+  {
+    id: 1, name: "Gozney", category: "Kitchen & Cooking", country: "🇬🇧 UK",
+    website: "gozney.com", instagram: "@gozney", ig_followers: "380K",
+    desc: "Premium outdoor pizza ovens that combine serious performance with a distinctive, sculptural design language.",
+    why: "Perfect lifestyle overlap — pizza evenings, outdoor gathering, exceptional craftsmanship. Strong DACH presence.",
+    fit: 5, emoji: "🍕",
+    templateType: "outdoor-cooking",
+    emailHint: "mention the outdoor entertaining atmosphere and community feel of pizza evenings"
+  },
+  {
+    id: 2, name: "Ooni", category: "Kitchen & Cooking", country: "🇬🇧 UK",
+    website: "ooni.com", instagram: "@oonihq", ig_followers: "750K",
+    desc: "The world's best-selling pizza oven brand — versatile, beautifully designed, beloved by food lovers globally.",
+    why: "Strong community around home entertaining. Direct competitor to Gozney but broader audience.",
+    fit: 4, emoji: "🔥",
+    templateType: "outdoor-cooking",
+    emailHint: "focus on the ritual of home pizza making and gathering"
+  },
+  {
+    id: 3, name: "Smeg", category: "Kitchen & Cooking", country: "🇮🇹 Italy",
+    website: "smeg.com", instagram: "@smeg_official", ig_followers: "750K",
+    desc: "Iconic Italian kitchen appliances — retro-modern design language, instantly recognisable, loved by interior designers.",
+    why: "Iconic design brand that fits perfectly with interior-forward content. Works well styled in kitchens.",
+    fit: 5, emoji: "🏠",
+    templateType: "kitchen-appliance",
+    emailHint: "reference the intersection of appliance design and interior atmosphere"
+  },
+  {
+    id: 4, name: "BORA", category: "Kitchen & Cooking", country: "🇩🇪 Germany",
+    website: "bora.com", instagram: "@bora_kitchen", ig_followers: "120K",
+    desc: "Premium German kitchen systems — the downward extraction cooktop that redefined kitchen design.",
+    why: "German brand, premium architecture-aligned kitchen tech. Perfect for showcasing in client projects.",
+    fit: 5, emoji: "🍳",
+    templateType: "kitchen-appliance",
+    emailHint: "highlight how BORA's clean design philosophy enhances the kitchen space"
+  },
+  {
+    id: 5, name: "Miele", category: "Kitchen & Cooking", country: "🇩🇪 Germany",
+    website: "miele.de", instagram: "@mieleofficial", ig_followers: "180K",
+    desc: "Germany's premium household appliance brand — 'Immer Besser' quality, timeless design, trusted by designers.",
+    why: "Premium German brand, major DACH appeal. Integrates naturally into high-spec kitchen photography.",
+    fit: 4, emoji: "⚪",
+    templateType: "kitchen-appliance",
+    emailHint: "focus on how Miele's longevity and quality ethos aligns with intentional, considered design"
+  },
+  {
+    id: 6, name: "Le Creuset", category: "Kitchen & Cooking", country: "🇫🇷 France",
+    website: "lecreuset.com", instagram: "@lecreuset", ig_followers: "720K",
+    desc: "French cast iron cookware that is as much a design object as a cooking tool — iconic, colourful, collectible.",
+    why: "Highly photogenic, lifestyle-oriented product with strong design identity. Excellent for tabletop and kitchen content.",
+    fit: 5, emoji: "🫕",
+    templateType: "cookware",
+    emailHint: "style it as a design object within a curated kitchen or dining setting"
+  },
+  {
+    id: 7, name: "Staub", category: "Kitchen & Cooking", country: "🇫🇷 France",
+    website: "staub.eu", instagram: "@staub_official", ig_followers: "220K",
+    desc: "Alsatian cast iron cookware — darker, more architectural aesthetic than Le Creuset. Preferred by professional chefs.",
+    why: "More refined, less commercial feel than competitors. The matte dark finishes photograph beautifully.",
+    fit: 5, emoji: "🥘",
+    templateType: "cookware",
+    emailHint: "emphasise the tactile, material quality and how it reads in an editorial kitchen setting"
+  },
+  {
+    id: 8, name: "De'Longhi", category: "Kitchen & Cooking", country: "🇮🇹 Italy",
+    website: "delonghi.com", instagram: "@delonghi", ig_followers: "340K",
+    desc: "Italian espresso machines and kitchen appliances — the La Specialista and Dinamica ranges are design objects.",
+    why: "Morning coffee ritual content, beautiful machines, strong Italian design sensibility.",
+    fit: 4, emoji: "☕",
+    templateType: "kitchen-appliance",
+    emailHint: "build a narrative around the morning ritual and the role of beautiful objects in everyday life"
+  },
+
+  // ── Home & Furniture ───────────────────────────────
+  {
+    id: 9, name: "Fritz Hansen", category: "Home & Furniture", country: "🇩🇰 Denmark",
+    website: "fritzhansen.com", instagram: "@fritzhansen", ig_followers: "430K",
+    desc: "Danish design house producing iconic furniture — the Egg Chair, Series 7, Swan. Timeless, museum-quality pieces.",
+    why: "The pinnacle of Scandinavian design — a natural fit for architectural interiors and design-forward content.",
+    fit: 5, emoji: "🪑",
+    templateType: "furniture",
+    emailHint: "position the piece within a designed space, showing how iconic furniture shapes a room's atmosphere"
+  },
+  {
+    id: 10, name: "HAY", category: "Home & Furniture", country: "🇩🇰 Denmark",
+    website: "hay.com", instagram: "@hay_design", ig_followers: "1.1M",
+    desc: "Danish design brand making furniture, textiles, and objects that combine colour, wit, and Scandinavian craft.",
+    why: "Accessible luxury with outstanding visual identity. Works across furniture, accessories, and textiles.",
+    fit: 5, emoji: "◎",
+    templateType: "furniture",
+    emailHint: "explore how HAY's colour palette and material philosophy contributes to a holistic interior concept"
+  },
+  {
+    id: 11, name: "Muuto", category: "Home & Furniture", country: "🇩🇰 Denmark",
+    website: "muuto.com", instagram: "@muuto", ig_followers: "480K",
+    desc: "Danish brand built on the Nordic design tradition — thoughtful objects with a clear sense of materiality and craft.",
+    why: "Strong design credentials, natural textures and finishes that photograph beautifully in real spaces.",
+    fit: 5, emoji: "✦",
+    templateType: "furniture",
+    emailHint: "show how Muuto's objects sit within a layered, considered interior atmosphere"
+  },
+  {
+    id: 12, name: "Menu / Audo Copenhagen", category: "Home & Furniture", country: "🇩🇰 Denmark",
+    website: "audocopenhagen.com", instagram: "@audocopenhagen", ig_followers: "280K",
+    desc: "Copenhagen design brand — furniture, lighting and objects with a warm, material-focused aesthetic.",
+    why: "Very aligned with your warm, atmospheric approach. Excellent material story to tell visually.",
+    fit: 5, emoji: "◻",
+    templateType: "furniture",
+    emailHint: "explore the intersection of material warmth and architectural restraint in a residential context"
+  },
+  {
+    id: 13, name: "Ethnicraft", category: "Home & Furniture", country: "🇧🇪 Belgium",
+    website: "ethnicraft.com", instagram: "@ethnicraft", ig_followers: "320K",
+    desc: "Solid wood furniture made with exceptional craftsmanship — the materiality and weight are central to the appeal.",
+    why: "The natural wood textures and honest materials make for exceptional photography in natural light.",
+    fit: 5, emoji: "🪵",
+    templateType: "furniture",
+    emailHint: "showcase the material quality and longevity — furniture as architecture within the home"
+  },
+  {
+    id: 14, name: "Hem", category: "Home & Furniture", country: "🇸🇪 Sweden",
+    website: "hem.com", instagram: "@hem.com", ig_followers: "140K",
+    desc: "Swedish design brand collaborating with international designers on furniture with strong conceptual foundations.",
+    why: "Emerging brand with great design credentials — strong visual identity, good for editorial-style content.",
+    fit: 4, emoji: "▲",
+    templateType: "furniture",
+    emailHint: "highlight the design story behind specific pieces and how concept-led furniture shapes a space"
+  },
+  {
+    id: 15, name: "Poliform", category: "Home & Furniture", country: "🇮🇹 Italy",
+    website: "poliform.it", instagram: "@poliformofficial", ig_followers: "560K",
+    desc: "Italian luxury furniture brand — wardrobes, kitchens, sofas designed with architectural precision.",
+    why: "Premium Italian positioning, architecture-forward design. Strong match for your professional client work.",
+    fit: 4, emoji: "⬜",
+    templateType: "furniture",
+    emailHint: "position Poliform as the intersection of architecture and furniture design within a project"
+  },
+  {
+    id: 16, name: "Westwing", category: "Home & Furniture", country: "🇩🇪 Germany",
+    website: "westwing.de", instagram: "@westwing", ig_followers: "1.2M",
+    desc: "German premium home & living platform — curated selection of design brands for the DACH market.",
+    why: "Perfect DACH market fit. Westwing works with interior influencers and has a strong editorial program.",
+    fit: 4, emoji: "🏡",
+    templateType: "platform",
+    emailHint: "position yourself as a design authority who curates and contextualises their product selection for the DACH audience"
+  },
+
+  // ── Lighting ──────────────────────────────────────
+  {
+    id: 17, name: "FLOS", category: "Lighting", country: "🇮🇹 Italy",
+    website: "flos.com", instagram: "@flos_official", ig_followers: "400K",
+    desc: "Italian lighting manufacturer — iconic designs by Castiglioni, Starck, Bouroullec. The reference point in design lighting.",
+    why: "Lighting is central to atmospheric interior photography. FLOS pieces transform a space completely.",
+    fit: 5, emoji: "💡",
+    templateType: "lighting",
+    emailHint: "show how light shapes the atmosphere of a designed space — FLOS as a design element, not a product"
+  },
+  {
+    id: 18, name: "Louis Poulsen", category: "Lighting", country: "🇩🇰 Denmark",
+    website: "louispoulsen.com", instagram: "@louispoulsen", ig_followers: "280K",
+    desc: "Danish lighting design since 1874 — the PH series, Artichoke, and Panthella are icons of Nordic design.",
+    why: "Deeply design-literate brand with architectural credibility. The fixtures are photographic subjects in themselves.",
+    fit: 5, emoji: "🏮",
+    templateType: "lighting",
+    emailHint: "explore the relationship between light diffusion, shadow, and spatial atmosphere in your design projects"
+  },
+  {
+    id: 19, name: "Artemide", category: "Lighting", country: "🇮🇹 Italy",
+    website: "artemide.com", instagram: "@artemide_official", ig_followers: "230K",
+    desc: "Italian design brand whose lamps are in MoMA's permanent collection. 'The Human Light' philosophy.",
+    why: "Strong design story, collaboration history with top architects. Natural fit for design-forward content.",
+    fit: 5, emoji: "○",
+    templateType: "lighting",
+    emailHint: "reference the design philosophy and how the specific fixture changes the emotional quality of a space"
+  },
+  {
+    id: 20, name: "Tom Dixon", category: "Lighting", country: "🇬🇧 UK",
+    website: "tomdixon.net", instagram: "@tomdixon", ig_followers: "380K",
+    desc: "British design brand — the Beat lights, Melt pendants, and Copper shades are instantly recognisable.",
+    why: "Distinctive, bold visual identity. The copper and dark finishes work beautifully in architectural photography.",
+    fit: 4, emoji: "◉",
+    templateType: "lighting",
+    emailHint: "position the pieces as sculptural focal points within a room composition"
+  },
+  {
+    id: 21, name: "Nuura", category: "Lighting", country: "🇩🇰 Denmark",
+    website: "nuura.com", instagram: "@nuura_lighting", ig_followers: "60K",
+    desc: "Young Danish lighting brand — the Miira and Blossi pendants are becoming contemporary design classics.",
+    why: "Emerging brand with authentic design story. Less saturated with influencer content — high opportunity.",
+    fit: 5, emoji: "✿",
+    templateType: "lighting",
+    emailHint: "be specific about the Miira or Blossi series and how the organic form works within architectural spaces"
+  },
+  {
+    id: 22, name: "Buster + Punch", category: "Lighting", country: "🇬🇧 UK",
+    website: "busterandpunch.com", instagram: "@busterandpunch", ig_followers: "500K",
+    desc: "London design brand — hardware, lighting, and electrical fittings inspired by industrial and custom car culture.",
+    why: "Strong material story (knurled metal, smoked glass), works in both minimal and industrial interior contexts.",
+    fit: 4, emoji: "✦",
+    templateType: "lighting",
+    emailHint: "explore how hardware details — switches, fittings — elevate the overall architecture of a space"
+  },
+
+  // ── Materials & Surfaces ──────────────────────────
+  {
+    id: 23, name: "Farrow & Ball", category: "Materials & Surfaces", country: "🇬🇧 UK",
+    website: "farrow-ball.com", instagram: "@farrowandball", ig_followers: "820K",
+    desc: "English paint manufacturer — extraordinary pigment depth, unique colour names, and a distinctly atmospheric quality.",
+    why: "Paint is the foundation of any interior. F&B's colours and finishes are central to the 'atmospheric' look.",
+    fit: 5, emoji: "🎨",
+    templateType: "materials",
+    emailHint: "focus on how colour creates atmosphere — explore a specific palette within a real project"
+  },
+  {
+    id: 24, name: "Little Greene", category: "Materials & Surfaces", country: "🇬🇧 UK",
+    website: "littlegreene.com", instagram: "@littlegreenepaint", ig_followers: "290K",
+    desc: "English paint and wallpaper brand — historically informed colours with exceptional pigment quality.",
+    why: "Strong alternative to F&B with more architectural colour palette. Great visual storytelling potential.",
+    fit: 5, emoji: "🖌",
+    templateType: "materials",
+    emailHint: "explore specific colours and their effect on spatial perception in a real design project"
+  },
+  {
+    id: 25, name: "Porcelanosa", category: "Materials & Surfaces", country: "🇪🇸 Spain",
+    website: "porcelanosa.com", instagram: "@porcelanosa_official", ig_followers: "650K",
+    desc: "Spanish leader in tiles, stone, and bathroom design — technical excellence with strong design credentials.",
+    why: "Surfaces are central to interior design photography. Large-format tiles particularly impactful visually.",
+    fit: 4, emoji: "▩",
+    templateType: "materials",
+    emailHint: "show how a specific surface material creates the spatial mood of a room in your client projects"
+  },
+  {
+    id: 26, name: "Duravit", category: "Materials & Surfaces", country: "🇩🇪 Germany",
+    website: "duravit.de", instagram: "@duravit", ig_followers: "190K",
+    desc: "German bathroom brand — designed with Philippe Starck, Sieger Design. Exceptional quality and minimalist forms.",
+    why: "German brand, premium positioning. Bathroom design is highly aspirational content for your audience.",
+    fit: 4, emoji: "🚿",
+    templateType: "materials",
+    emailHint: "approach the bathroom as an architectural space — the interplay of material, water, and light"
+  },
+  {
+    id: 27, name: "GROHE", category: "Materials & Surfaces", country: "🇩🇪 Germany",
+    website: "grohe.com", instagram: "@grohe_official", ig_followers: "240K",
+    desc: "German precision water fittings — the Atrio and Allure ranges are design classics. 'Pure Freude an Wasser'.",
+    why: "Premium German brand with exceptional material quality. Taps and showers photograph beautifully with right styling.",
+    fit: 4, emoji: "🚰",
+    templateType: "materials",
+    emailHint: "focus on the material craftsmanship of the fittings — precision objects within an architectural interior"
+  },
+
+  // ── Outdoor & Garden ──────────────────────────────
+  {
+    id: 28, name: "Kettal", category: "Outdoor & Garden", country: "🇪🇸 Spain",
+    website: "kettal.com", instagram: "@kettal_official", ig_followers: "80K",
+    desc: "Spanish outdoor furniture — produced with the world's leading designers including Jasper Morrison and Ronan Bouroullec.",
+    why: "Premium design credentials outdoors. The Bitta and Vieques collections are architectural outdoor pieces.",
+    fit: 5, emoji: "🌿",
+    templateType: "outdoor",
+    emailHint: "position the outdoor space as an architectural extension of the interior — same material intelligence"
+  },
+  {
+    id: 29, name: "Skagerak", category: "Outdoor & Garden", country: "🇩🇰 Denmark",
+    website: "skagerak.com", instagram: "@skagerak", ig_followers: "150K",
+    desc: "Danish brand making teak and FSC-certified wood outdoor furniture — seasonal living with Scandinavian sensibility.",
+    why: "Sustainable materials, beautiful teak finishes, strong seasonal lifestyle narrative around outdoor spaces.",
+    fit: 5, emoji: "🪵",
+    templateType: "outdoor",
+    emailHint: "explore the concept of designed outdoor living — bringing interior material quality to the garden"
+  },
+  {
+    id: 30, name: "Weltevree", category: "Outdoor & Garden", country: "🇳🇱 Netherlands",
+    website: "weltevree.eu", instagram: "@weltevree", ig_followers: "120K",
+    desc: "Dutch outdoor design brand — the Dutchtub, Outdooroven, and Guidelight are design-forward outdoor objects.",
+    why: "Unique objects with strong design identity. The fire and water elements create exceptional visual content.",
+    fit: 5, emoji: "🔥",
+    templateType: "outdoor",
+    emailHint: "explore how Weltevree's objects transform an outdoor space into a sensory, designed environment"
+  },
+  {
+    id: 31, name: "Dedon", category: "Outdoor & Garden", country: "🇩🇪 Germany",
+    website: "dedon.de", instagram: "@dedon_official", ig_followers: "100K",
+    desc: "German luxury outdoor furniture — the Nestrest and Mbrace are icons of contemporary outdoor design.",
+    why: "German brand with exceptional luxury outdoor positioning. Strong material and craft story.",
+    fit: 4, emoji: "🌾",
+    templateType: "outdoor",
+    emailHint: "position the outdoor environment as an extension of interior luxury — material quality without compromise"
+  },
+
+  // ── Lifestyle & Fragrance ─────────────────────────
+  {
+    id: 32, name: "Aesop", category: "Lifestyle & Fragrance", country: "🇦🇺 Australia",
+    website: "aesop.com", instagram: "@aesop", ig_followers: "1.1M",
+    desc: "Australian botanical skincare brand — the pharmacy bottles and dark glass packaging are iconic design objects.",
+    why: "The most design-literate skincare brand. Aesop products photograph beautifully and signal taste.",
+    fit: 5, emoji: "◎",
+    templateType: "lifestyle",
+    emailHint: "integrate Aesop into a curated bathroom or workspace tableau — the objects as part of the designed environment"
+  },
+  {
+    id: 33, name: "Diptyque", category: "Lifestyle & Fragrance", country: "🇫🇷 France",
+    website: "diptyqueparis.com", instagram: "@diptyque", ig_followers: "900K",
+    desc: "Parisian fragrance house — the black and white oval label on candles and perfumes is one of design's great icons.",
+    why: "Candles are a fundamental styling element in interior photography. Diptyque's visual identity is impeccable.",
+    fit: 5, emoji: "🕯",
+    templateType: "lifestyle",
+    emailHint: "reference specific scents that connect to spatial atmosphere — the connection between scent and space"
+  },
+  {
+    id: 34, name: "byredo", category: "Lifestyle & Fragrance", country: "🇸🇪 Sweden",
+    website: "byredo.com", instagram: "@byredo", ig_followers: "870K",
+    desc: "Swedish luxury fragrance brand founded by Ben Gorham — minimalist packaging, emotionally resonant scents.",
+    why: "Swedish minimalism, strong design identity. The black packaging works beautifully in minimal interior shots.",
+    fit: 5, emoji: "✦",
+    templateType: "lifestyle",
+    emailHint: "connect the concept of scent memory to spatial memory — how Byredo's fragrances define an atmosphere"
+  },
+  {
+    id: 35, name: "Vipp", category: "Lifestyle & Fragrance", country: "🇩🇰 Denmark",
+    website: "vipp.com", instagram: "@vipp", ig_followers: "200K",
+    desc: "Danish design brand starting from the iconic pedal bin — now complete bathroom, kitchen, and shelter collections.",
+    why: "Perfect industrial-meets-refined aesthetic. The Vipp bin is a genuine design icon for design-literate audiences.",
+    fit: 5, emoji: "⬛",
+    templateType: "lifestyle",
+    emailHint: "explore the Vipp philosophy of honest industrial design elevated to domestic use"
+  },
+
+  // ── Tableware & Glass ─────────────────────────────
+  {
+    id: 36, name: "Iittala", category: "Tableware & Glass", country: "🇫🇮 Finland",
+    website: "iittala.com", instagram: "@iittala", ig_followers: "430K",
+    desc: "Finnish design house — Alvar Aalto's Savoy vase, Tapio Wirkkala's Ultima Thule glassware. Timeless Nordic design.",
+    why: "Iconic tableware with genuine design heritage. The glass pieces are stunning in natural light photography.",
+    fit: 5, emoji: "🫗",
+    templateType: "tableware",
+    emailHint: "explore how Nordic design objects on a table create a complete atmospheric tableau"
+  },
+  {
+    id: 37, name: "Georg Jensen", category: "Tableware & Glass", country: "🇩🇰 Denmark",
+    website: "georgjensen.com", instagram: "@georgjensen", ig_followers: "340K",
+    desc: "Danish silverware and jewellery house since 1904 — the Sky and Bernadotte lines are modern classics.",
+    why: "Premium materials, exceptional craftsmanship. The silver and steel pieces elevate any table setting.",
+    fit: 4, emoji: "🍴",
+    templateType: "tableware",
+    emailHint: "treat tableware as part of the overall spatial composition — Georg Jensen's objects as design punctuation"
+  },
+  {
+    id: 38, name: "Riedel", category: "Tableware & Glass", country: "🇦🇹 Austria",
+    website: "riedel.com", instagram: "@riedel_official", ig_followers: "220K",
+    desc: "Austrian crystal glassware — the O Wine Tumbler and Fatto A Mano collections are design objects.",
+    why: "Beautiful glassware for dining/entertaining content. The handmade coloured series is visually stunning.",
+    fit: 4, emoji: "🥂",
+    templateType: "tableware",
+    emailHint: "build a refined table setting where Riedel glassware is the centrepiece of a gathered moment"
+  },
+  {
+    id: 39, name: "LSA International", category: "Tableware & Glass", country: "🇬🇧 UK",
+    website: "lsa-international.com", instagram: "@lsa_international", ig_followers: "140K",
+    desc: "British handmade glassware and ceramics — the Moya and Pearl collections are design-forward and photogenic.",
+    why: "Accessible luxury glassware with strong lifestyle positioning. Works well in tablescape content.",
+    fit: 4, emoji: "🫙",
+    templateType: "tableware",
+    emailHint: "create an editorial table setting where the glassware becomes part of the designed experience"
+  },
+  {
+    id: 40, name: "Hay Tableware", category: "Tableware & Glass", country: "🇩🇰 Denmark",
+    website: "hay.com/tableware", instagram: "@hay_design", ig_followers: "1.1M",
+    desc: "HAY's expanded range into tableware, textiles, and kitchen objects — same bold colour, same Danish craft.",
+    why: "Natural extension of HAY furniture relationship — a complete home narrative possible with one brand partner.",
+    fit: 5, emoji: "◎",
+    templateType: "tableware",
+    emailHint: "explore a complete HAY-designed room — from furniture to tableware — as a cohesive design story"
+  },
+
+  // ── Art & Prints ──────────────────────────────────
+  {
+    id: 41, name: "The Poster Club", category: "Art & Prints", country: "🇩🇰 Denmark",
+    website: "theposterclub.com", instagram: "@theposterclub", ig_followers: "380K",
+    desc: "Copenhagen art print platform — collaborating with Nordic designers and photographers on limited edition prints.",
+    why: "Art on walls is central to interior photography. The Poster Club's aesthetic is very aligned with your content.",
+    fit: 5, emoji: "🖼",
+    templateType: "art",
+    emailHint: "show how art prints define the mood and visual language of a space in a real design project"
+  },
+  {
+    id: 42, name: "Desenio", category: "Art & Prints", country: "🇸🇪 Sweden",
+    website: "desenio.de", instagram: "@desenio", ig_followers: "2.3M",
+    desc: "Swedish art print brand — vast curated catalogue at accessible price points, dominant in the DACH market.",
+    why: "Huge DACH presence, active influencer program. Very high potential reach for a German-speaking audience.",
+    fit: 4, emoji: "◻",
+    templateType: "art",
+    emailHint: "curate a gallery wall for a specific room type — show Desenio's role in the finished interior concept"
+  },
+  {
+    id: 43, name: "Artsy / Gallery Direct", category: "Art & Prints", country: "🌍 Global",
+    website: "artsyforbrands.com", instagram: "@artsy", ig_followers: "710K",
+    desc: "The leading online art marketplace — partnerships available for interior and design influencers.",
+    why: "Art curation and collecting narrative resonates with a design-literate audience. Premium positioning.",
+    fit: 4, emoji: "🎨",
+    templateType: "art",
+    emailHint: "explore the process of choosing and living with original art — art as the soul of a designed space"
+  },
+];
+
+let activeCategory = 'all';
+let searchTerm = '';
+let selectedBrand = null;
+
+function getOutreachMap() {
+  const outreach = JSON.parse(localStorage.getItem('outreach') || '[]');
+  const map = {};
+  outreach.forEach(o => { if (o.brandId) map[o.brandId] = true; });
+  return map;
+}
+
+function fitDots(score) {
+  let html = '';
+  for (let i = 1; i <= 5; i++) {
+    html += `<span class="dot${i <= score ? ' filled' : ''}"></span>`;
+  }
+  return html;
+}
+
+function renderBrands() {
+  const grid = document.getElementById('brandsGrid');
+  const outreachMap = getOutreachMap();
+
+  let filtered = BRANDS.filter(b => {
+    const catMatch = activeCategory === 'all' || b.category === activeCategory;
+    const search = searchTerm.toLowerCase();
+    const searchMatch = !search ||
+      b.name.toLowerCase().includes(search) ||
+      b.category.toLowerCase().includes(search) ||
+      b.desc.toLowerCase().includes(search) ||
+      b.country.toLowerCase().includes(search);
+    return catMatch && searchMatch;
+  });
+
+  document.getElementById('resultsCount').textContent = `${filtered.length} brand${filtered.length !== 1 ? 's' : ''}`;
+
+  if (!filtered.length) {
+    grid.innerHTML = '<div class="no-results">No brands match your filter — try a different category or search term.</div>';
+    return;
+  }
+
+  grid.innerHTML = filtered.map(b => {
+    const inPipeline = outreachMap[b.id];
+    return `<div class="brand-card" onclick="openAddModal(${b.id})">
+      <div class="brand-card-top">
+        <div class="brand-logo">${b.emoji}</div>
+        <div class="brand-meta">
+          <div class="brand-name">${b.name}</div>
+          <div class="brand-country">${b.country}</div>
+        </div>
+        <span class="brand-category-chip">${b.category.split(' & ')[0]}</span>
+      </div>
+      <div class="brand-card-body">
+        <p class="brand-desc">${b.desc}</p>
+        <p class="brand-why">${b.why}</p>
+        <div class="fit-dots" title="Aesthetic fit score">${fitDots(b.fit)}</div>
+      </div>
+      <div class="brand-card-footer">
+        <span class="brand-ig">${b.instagram} · ${b.ig_followers}</span>
+        <button class="add-btn${inPipeline ? ' added' : ''}" onclick="event.stopPropagation();openAddModal(${b.id})">
+          ${inPipeline ? '✓ In Pipeline' : '+ Outreach'}
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openAddModal(brandId) {
+  selectedBrand = BRANDS.find(b => b.id === brandId);
+  if (!selectedBrand) return;
+  document.getElementById('modalBrandName').textContent = selectedBrand.name;
+  document.getElementById('modalBrandDesc').textContent =
+    `${selectedBrand.country} · ${selectedBrand.category}\n${selectedBrand.desc}`;
+  document.getElementById('modalEmail').value = '';
+  document.getElementById('modalNotes').value = '';
+  document.getElementById('addModal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('addModal').classList.remove('open');
+  selectedBrand = null;
+}
+
+function confirmAdd() {
+  if (!selectedBrand) return;
+  const outreach = JSON.parse(localStorage.getItem('outreach') || '[]');
+
+  if (outreach.find(o => o.brandId === selectedBrand.id)) {
+    closeModal();
+    window.location.href = 'outreach.html';
+    return;
+  }
+
+  const entry = {
+    id: Date.now().toString(),
+    brandId: selectedBrand.id,
+    brandName: selectedBrand.name,
+    brandCategory: selectedBrand.category,
+    brandCountry: selectedBrand.country,
+    brandInstagram: selectedBrand.instagram,
+    templateType: selectedBrand.templateType,
+    emailHint: selectedBrand.emailHint,
+    contactEmail: document.getElementById('modalEmail').value.trim(),
+    notes: document.getElementById('modalNotes').value.trim(),
+    status: 'new',
+    addedDate: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  outreach.push(entry);
+  localStorage.setItem('outreach', JSON.stringify(outreach));
+  closeModal();
+  showToast(`${selectedBrand.name} added to pipeline`);
+  renderBrands();
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// Filter chips
+document.getElementById('filterChips').addEventListener('click', e => {
+  const chip = e.target.closest('.chip');
+  if (!chip) return;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+  activeCategory = chip.dataset.cat;
+  renderBrands();
+});
+
+// Search
+document.getElementById('searchInput').addEventListener('input', e => {
+  searchTerm = e.target.value;
+  renderBrands();
+});
+
+// Close modal on overlay click
+document.getElementById('addModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('addModal')) closeModal();
+});
+
+renderBrands();
+</script>
+</body>
+</html>
