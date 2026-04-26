@@ -270,6 +270,25 @@
   </div>
 </div>
 
+<!-- EMAIL DRAFT MODAL -->
+<div class="modal-overlay" id="emailModal">
+  <div class="modal" style="max-width:780px;">
+    <button class="modal-close" onclick="closeEmailModal()">×</button>
+    <div class="modal-title" id="emailModalTitle"></div>
+    <div style="display:flex;gap:0;border:1px solid var(--border);margin-bottom:20px;">
+      <button class="template-tab active" data-tmpl="initial" onclick="switchEmailTab('initial',this)" style="padding:10px 20px;font-size:12px;letter-spacing:0.06em;text-transform:uppercase;background:var(--text);color:var(--bg);border:none;cursor:pointer;font-family:'Jost',sans-serif;">Initial Outreach</button>
+      <button class="template-tab" data-tmpl="followup" onclick="switchEmailTab('followup',this)" style="padding:10px 20px;font-size:12px;letter-spacing:0.06em;text-transform:uppercase;background:none;border:none;border-right:1px solid var(--border);color:var(--text-mid);cursor:pointer;font-family:'Jost',sans-serif;">Follow-up</button>
+    </div>
+    <div style="font-size:12px;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-mid);margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border);" id="emailModalSubject"></div>
+    <div style="background:var(--surface);border:1px solid var(--border);padding:24px 28px;font-size:14px;line-height:1.8;white-space:pre-wrap;font-family:'Jost',sans-serif;max-height:380px;overflow-y:auto;" id="emailModalBody"></div>
+    <div style="display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;">
+      <button class="btn btn-primary" style="flex:2;" onclick="openEmailInGmail()">↗ Open in Gmail & Mark Sent</button>
+      <button class="btn btn-gold" onclick="copyEmailFromModal()" style="flex:1;">Copy</button>
+      <button class="btn btn-outline" onclick="closeEmailModal()">Close</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const BRANDS = [
   // ── Outdoor Kitchens ──────────────────────────────
@@ -782,9 +801,13 @@ function renderBrands() {
       </div>
       <div class="brand-card-footer">
         <span class="brand-ig">${b.instagram} · ${b.ig_followers}</span>
-        <button class="add-btn${inPipeline ? ' added' : ''}" onclick="event.stopPropagation();openAddModal(${b.id})">
-          ${inPipeline ? '✓ In Pipeline' : '+ Outreach'}
-        </button>
+        <div style="display:flex;gap:6px;">
+          ${inPipeline
+            ? `<button class="add-btn" style="background:var(--text);color:var(--bg);border-color:var(--text);" onclick="event.stopPropagation();openEmailDraft(${b.id})">✉ Draft & Send</button>`
+            : `<button class="add-btn" onclick="event.stopPropagation();openAddModal(${b.id})">+ Outreach</button>
+               <button class="add-btn" onclick="event.stopPropagation();openEmailDraft(${b.id})" title="Add & draft email" style="padding:6px 10px;">✉</button>`
+          }
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -866,6 +889,129 @@ document.getElementById('searchInput').addEventListener('input', e => {
 document.getElementById('addModal').addEventListener('click', e => {
   if (e.target === document.getElementById('addModal')) closeModal();
 });
+document.getElementById('emailModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('emailModal')) closeEmailModal();
+});
+
+// ── EMAIL DRAFT from Brands page ──────────────────────────
+let emailEntry = null;
+let emailTabKey = 'initial';
+
+function buildEmailBody(entry, key) {
+  const name = entry.brandName;
+  const hint = entry.emailHint || '';
+  const stats = `Follower: 65.000\nMonatliche Reichweite: 991.000 unique accounts\nWachstum: 4,5 % pro Monat\nReel-Aufrufe: Ø 35.000 · Peak 4 Mio.\nPublikum: 86 % weiblich · Kernalter 25-55\nMarkt Nr. 1: Deutschland (22,2 %)`;
+  const mediaKit = 'https://hausmomster.github.io/Brand-Outreach/media-kit.html';
+  const sig = 'Herzliche Gruesse,\nLejla Krstic · @haus_momster\nhausmomster@gmail.com · +49 163 798 4021';
+
+  if (key === 'followup') {
+    return {
+      subject: `Follow-up: Kooperationsanfrage @haus_momster x ${name}`,
+      body: `Hallo liebes ${name}-Team,\n\nich wollte kurz nachhaken – meine Anfrage vom letzten Mal ist vielleicht untergegangen.\n\nIch bin Lejla Krstic, Architektin und Content Creator hinter @haus_momster, und wurde sehr gerne besprechen, ob eine Zusammenarbeit fuer uns beide passt.\n\nMedia Kit: ${mediaKit}\n\n${sig}`
+    };
+  }
+
+  return {
+    subject: `Kooperationsanfrage @haus_momster x ${name} | Architektin · 65K · 991K Reach`,
+    body: `Hallo liebes ${name}-Team,\n\nich bin Lejla Krstic – Architektin, Interior Designerin und Content Creator hinter @haus_momster.\n\n${hint}\n\nMeine Reichweite (Maerz-April 2026):\n\n${stats}\n\nMeine Community sind Hauseigentuemerinnnen, die mit Architekturanspruch renovieren und investieren.\n\nMedia Kit: ${mediaKit}\n\nIch freue mich auf den Austausch.\n\n${sig}`
+  };
+}
+
+function openEmailDraft(brandId) {
+  const outreach = JSON.parse(localStorage.getItem('outreach') || '[]');
+  emailEntry = outreach.find(o => o.brandId === brandId || o.brandName === (BRANDS.find(b => b.id === brandId) || {}).name);
+  if (!emailEntry) {
+    // Not in pipeline yet — add then open
+    selectedBrand = BRANDS.find(b => b.id === brandId);
+    if (!selectedBrand) return;
+    const entry = {
+      id: Date.now().toString(),
+      brandId: selectedBrand.id,
+      brandName: selectedBrand.name,
+      brandCategory: selectedBrand.category,
+      brandCountry: selectedBrand.country,
+      brandInstagram: selectedBrand.instagram,
+      templateType: selectedBrand.templateType,
+      emailHint: selectedBrand.emailHint,
+      contactEmail: '',
+      notes: '',
+      status: 'new',
+      addedDate: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    outreach.push(entry);
+    localStorage.setItem('outreach', JSON.stringify(outreach));
+    emailEntry = entry;
+    showToast(`${selectedBrand.name} added to pipeline`);
+    renderBrands();
+  }
+  emailTabKey = 'initial';
+  renderEmailModal();
+  document.getElementById('emailModal').classList.add('open');
+}
+
+function renderEmailModal() {
+  if (!emailEntry) return;
+  const { subject, body } = buildEmailBody(emailEntry, emailTabKey);
+  document.getElementById('emailModalTitle').textContent = emailEntry.brandName;
+  document.getElementById('emailModalSubject').textContent = 'Subject: ' + subject;
+  document.getElementById('emailModalBody').textContent = body;
+
+  document.querySelectorAll('#emailModal .template-tab').forEach(t => {
+    const isActive = t.dataset.tmpl === emailTabKey;
+    t.style.background = isActive ? 'var(--text)' : 'none';
+    t.style.color = isActive ? 'var(--bg)' : 'var(--text-mid)';
+  });
+}
+
+function switchEmailTab(key, btn) {
+  emailTabKey = key;
+  renderEmailModal();
+}
+
+function closeEmailModal() {
+  document.getElementById('emailModal').classList.remove('open');
+  emailEntry = null;
+}
+
+function openEmailInGmail() {
+  if (!emailEntry) return;
+  const { subject, body } = buildEmailBody(emailEntry, emailTabKey);
+  const to = emailEntry.contactEmail || '';
+  const url = 'https://mail.google.com/mail/u/hausmomster@gmail.com/?view=cm'
+    + '&to=' + encodeURIComponent(to)
+    + '&su=' + encodeURIComponent(subject)
+    + '&body=' + encodeURIComponent(body);
+  window.open(url, '_blank');
+
+  // Mark sent
+  const outreach = JSON.parse(localStorage.getItem('outreach') || '[]');
+  const idx = outreach.findIndex(o => o.id === emailEntry.id);
+  if (idx !== -1 && outreach[idx].status === 'new') {
+    outreach[idx].status = emailTabKey === 'followup' ? 'followed_up' : 'sent';
+    outreach[idx].sentDate = new Date().toISOString();
+    outreach[idx].updatedAt = new Date().toISOString();
+    localStorage.setItem('outreach', JSON.stringify(outreach));
+  }
+  closeEmailModal();
+  showToast('Opened in Gmail · status updated to Sent');
+  renderBrands();
+}
+
+function copyEmailFromModal() {
+  if (!emailEntry) return;
+  const { subject, body } = buildEmailBody(emailEntry, emailTabKey);
+  const full = 'Subject: ' + subject + '\n\n' + body;
+  navigator.clipboard.writeText(full).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = full;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  });
+  showToast('Copied to clipboard');
+}
 
 renderBrands();
 </script>

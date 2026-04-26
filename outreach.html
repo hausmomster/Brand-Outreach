@@ -38,7 +38,6 @@
 
     /* table */
     .outreach-table-wrap {
-      overflow-x: auto;
       margin-top: 32px;
     }
     .outreach-table {
@@ -51,13 +50,13 @@
       text-transform: uppercase;
       color: var(--text-light);
       font-weight: 500;
-      padding: 10px 16px;
+      padding: 10px 12px;
       text-align: left;
       border-bottom: 1px solid var(--border);
       white-space: nowrap;
     }
     .outreach-table td {
-      padding: 14px 16px;
+      padding: 12px 12px;
       border-bottom: 1px solid var(--border);
       vertical-align: middle;
     }
@@ -481,7 +480,6 @@ function render() {
             <th>Contact</th>
             <th>Follow-up</th>
             <th>Notes</th>
-            <th>Added</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -516,9 +514,8 @@ function render() {
               <td>
                 <span class="notes-cell" title="${(entry.notes || '').replace(/"/g, '&quot;')}">${entry.notes || '<span style="color:var(--text-light)">—</span>'}</span>
               </td>
-              <td><span class="date-cell">${addedDate}</span></td>
               <td class="actions-cell">
-                <button class="action-btn" onclick="openTemplateModal('${entry.id}')">✉ Email</button>
+                <button class="action-btn" style="background:var(--text);color:var(--bg);border-color:var(--text);font-weight:500;" onclick="openTemplateModal('${entry.id}')">✉ Draft & Send</button>
                 <button class="action-btn" onclick="openEditModal('${entry.id}')">Edit</button>
                 <button class="action-btn danger" onclick="deleteEntry('${entry.id}')">✕</button>
               </td>
