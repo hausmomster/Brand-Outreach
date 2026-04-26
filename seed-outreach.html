@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seeding Pipeline…</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="auth.js"></script>
+  <script>requireAuth();</script>
+</head>
+<body>
+<nav class="nav">
+  <a href="index.html" class="nav-brand">Lejla <span>Krstic</span></a>
+</nav>
+<div class="page-wrap">
+  <div class="container" style="padding-top:80px;text-align:center;">
+    <p class="eyebrow">Pipeline Setup</p>
+    <h1 class="section-title" style="font-size:40px;" id="statusTitle">Importing outreach…</h1>
+    <p style="color:var(--text-mid);font-size:15px;margin-top:12px;" id="statusMsg">Adding your sent emails to the pipeline.</p>
+  </div>
+</div>
+
+<script>
+const SEED_ENTRIES = [
+  {
+    id: '1745600001000',
+    brandId: 47,
+    brandName: 'ECOVACS GOAT',
+    brandCategory: 'Outdoor & Garden',
+    brandCountry: '🇩🇪 Germany',
+    brandInstagram: '@ecovacs_de',
+    templateType: 'outdoor',
+    emailHint: 'lead with the 2,350 qm garden and two kids — the product need is 100% authentic',
+    contactEmail: 'creator@competence-circle.com',
+    notes: 'Referred by ECOVACS DE Instagram. Contact is Competence Circle creator agency.',
+    status: 'sent',
+    addedDate: '2026-04-26T08:00:00.000Z',
+    sentDate: '2026-04-26T08:00:00.000Z',
+    updatedAt: '2026-04-26T08:00:00.000Z',
+  },
+  {
+    id: '1745600002000',
+    brandId: 48,
+    brandName: 'Eight Sleep',
+    brandCategory: 'Tech & Wellness',
+    brandCountry: '🇺🇸 US',
+    brandInstagram: '@eightsleep',
+    templateType: 'lifestyle',
+    emailHint: 'frame it as designing a bedroom that actually works — architecture, materials, and technology',
+    contactEmail: 'partnerships@eightsleep.com',
+    notes: 'German site: eightsleep.com/de — verify partnerships email before sending.',
+    status: 'sent',
+    addedDate: '2026-04-26T09:00:00.000Z',
+    sentDate: '2026-04-26T09:00:00.000Z',
+    updatedAt: '2026-04-26T09:00:00.000Z',
+  },
+  {
+    id: '1745600003000',
+    brandId: 44,
+    brandName: 'OCQ',
+    brandCategory: 'Outdoor & Garden',
+    brandCountry: '🇩🇪 Germany',
+    brandInstagram: '@ocq_outdoor_kitchens',
+    templateType: 'outdoor',
+    emailHint: 'reference the architect/planner angle — you speak their language',
+    contactEmail: 'info@o-c-q.com',
+    notes: 'Outdoor kitchen brand. "Reduced. Precise. Material-driven." — perfect brand alignment.',
+    status: 'sent',
+    addedDate: '2026-04-26T10:00:00.000Z',
+    sentDate: '2026-04-26T10:00:00.000Z',
+    updatedAt: '2026-04-26T10:00:00.000Z',
+  },
+  {
+    id: '1745600004000',
+    brandId: 45,
+    brandName: 'FREILUFT Manufaktur',
+    brandCategory: 'Outdoor & Garden',
+    brandCountry: '🇩🇪 Germany',
+    brandInstagram: '@freiluftmanufaktur',
+    templateType: 'outdoor',
+    emailHint: 'reference marine aluminium, natural stone — material honesty and editorial photography',
+    contactEmail: 'mail@freiluftmanufaktur.com',
+    notes: 'Handcrafted outdoor kitchens. "Quiet design." Up to 30-year warranty.',
+    status: 'sent',
+    addedDate: '2026-04-26T10:30:00.000Z',
+    sentDate: '2026-04-26T10:30:00.000Z',
+    updatedAt: '2026-04-26T10:30:00.000Z',
+  },
+  {
+    id: '1745600005000',
+    brandId: 46,
+    brandName: 'maet black',
+    brandCategory: 'Outdoor & Garden',
+    brandCountry: '🇩🇪 Germany',
+    brandInstagram: '@maetblack_home',
+    templateType: 'outdoor',
+    emailHint: 'reference Hans Winkler collaboration and sculptural outdoor kitchen aesthetic',
+    contactEmail: 'info@maetblack.de',
+    notes: 'Minimalist outdoor kitchens €10,500–€27,500. Designed with Hans Winkler.',
+    status: 'sent',
+    addedDate: '2026-04-26T11:00:00.000Z',
+    sentDate: '2026-04-26T11:00:00.000Z',
+    updatedAt: '2026-04-26T11:00:00.000Z',
+  },
+];
+
+function seed() {
+  const existing = JSON.parse(localStorage.getItem('outreach') || '[]');
+  const existingIds = new Set(existing.map(e => e.id));
+  const existingNames = new Set(existing.map(e => e.brandName.toLowerCase()));
+
+  const toAdd = SEED_ENTRIES.filter(e =>
+    !existingIds.has(e.id) && !existingNames.has(e.brandName.toLowerCase())
+  );
+
+  if (!toAdd.length) {
+    document.getElementById('statusTitle').textContent = 'Already up to date';
+    document.getElementById('statusMsg').textContent = 'All outreach entries are already in your pipeline.';
+  } else {
+    const merged = [...existing, ...toAdd];
+    localStorage.setItem('outreach', JSON.stringify(merged));
+    document.getElementById('statusTitle').textContent = `${toAdd.length} entries added`;
+    document.getElementById('statusMsg').textContent = `Redirecting to your pipeline…`;
+  }
+
+  setTimeout(() => { window.location.href = 'outreach.html'; }, 1800);
+}
+
+seed();
+</script>
+</body>
+</html>
