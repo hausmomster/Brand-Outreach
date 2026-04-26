@@ -266,8 +266,9 @@
       <div class="email-subject" id="emailSubject"></div>
       <div class="email-preview" id="emailPreview"></div>
     </div>
-    <div style="display:flex;gap:12px;margin-top:16px;">
-      <button class="btn btn-gold w-full" onclick="copyEmail()">Copy Email</button>
+    <div style="display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;">
+      <button class="btn btn-primary w-full" onclick="openInGmail()" style="flex:2;">↗ Open in Gmail & Mark Sent</button>
+      <button class="btn btn-gold" onclick="copyEmail()" style="flex:1;">Copy</button>
       <button class="btn btn-outline" onclick="closeTemplateModal()">Close</button>
     </div>
   </div>
@@ -642,6 +643,37 @@ function copyEmail() {
     document.body.removeChild(ta);
     showToast('Copied to clipboard');
   });
+}
+
+function openInGmail() {
+  if (!templateEntry) return;
+  const tmpl = TEMPLATES[currentTemplateKey];
+  const subject = tmpl.subject(templateEntry);
+  const body = tmpl.body(templateEntry);
+  const to = templateEntry.contactEmail || '';
+
+  const url = 'https://mail.google.com/mail/u/hausmomster@gmail.com/?view=cm'
+    + '&to=' + encodeURIComponent(to)
+    + '&su=' + encodeURIComponent(subject)
+    + '&body=' + encodeURIComponent(body);
+
+  window.open(url, '_blank');
+
+  // Mark as sent & record date
+  const outreach = getOutreach();
+  const idx = outreach.findIndex(o => o.id === templateEntry.id);
+  if (idx !== -1 && outreach[idx].status === 'new') {
+    outreach[idx].status = currentTemplateKey === 'followup' ? 'followed_up' : 'sent';
+    outreach[idx].sentDate = new Date().toISOString();
+    outreach[idx].updatedAt = new Date().toISOString();
+    saveOutreach(outreach);
+    showToast('Opened in Gmail · status updated to Sent');
+    closeTemplateModal();
+    render();
+  } else {
+    showToast('Opened in Gmail');
+    closeTemplateModal();
+  }
 }
 
 // Close modals on overlay click
