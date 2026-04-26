@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login — Lejla Krstic</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+    }
+    .login-wrap {
+      width: 100%;
+      max-width: 400px;
+      padding: 24px;
+    }
+    .login-box {
+      border: 1px solid var(--border);
+      padding: 48px 40px;
+    }
+    .login-brand {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 28px;
+      margin-bottom: 4px;
+    }
+    .login-brand span { color: var(--gold); font-style: italic; }
+    .login-sub {
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-light);
+      margin-bottom: 40px;
+    }
+    .login-error {
+      font-size: 13px;
+      color: var(--rose);
+      margin-bottom: 16px;
+      display: none;
+    }
+    .login-error.show { display: block; }
+    .password-wrap { position: relative; }
+    .toggle-pw {
+      position: absolute;
+      right: 12px; top: 50%;
+      transform: translateY(-50%);
+      background: none; border: none;
+      color: var(--text-light);
+      font-size: 13px;
+      cursor: pointer;
+      padding: 4px;
+    }
+    .toggle-pw:hover { color: var(--text); }
+    .login-footer {
+      margin-top: 32px;
+      text-align: center;
+    }
+    .login-footer a {
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-light);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2px;
+    }
+    .login-footer a:hover { color: var(--gold); border-color: var(--gold); }
+  </style>
+</head>
+<body>
+  <div class="login-wrap">
+    <div class="login-box">
+      <div class="login-brand">Lejla <span>Krstic</span></div>
+      <div class="login-sub">Brand Outreach Hub</div>
+
+      <div class="login-error" id="loginError">Incorrect password — try again.</div>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <div class="password-wrap">
+            <input
+              type="password"
+              class="form-control"
+              id="passwordInput"
+              placeholder="Enter password"
+              autocomplete="current-password"
+              autofocus
+            />
+            <button type="button" class="toggle-pw" id="togglePw" tabindex="-1">show</button>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary w-full" id="loginBtn">Enter</button>
+      </form>
+
+      <div class="login-footer">
+        <a href="media-kit.html">View public media kit →</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="auth.js"></script>
+  <script>
+    if (isAuthenticated()) {
+      window.location.replace('index.html');
+    }
+
+    const form = document.getElementById('loginForm');
+    const input = document.getElementById('passwordInput');
+    const error = document.getElementById('loginError');
+    const btn = document.getElementById('loginBtn');
+    const togglePw = document.getElementById('togglePw');
+
+    togglePw.addEventListener('click', () => {
+      const isHidden = input.type === 'password';
+      input.type = isHidden ? 'text' : 'password';
+      togglePw.textContent = isHidden ? 'hide' : 'show';
+    });
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      error.classList.remove('show');
+      btn.textContent = '...';
+      btn.disabled = true;
+      await attemptLogin(input.value, () => {
+        error.classList.add('show');
+        input.value = '';
+        input.focus();
+      });
+      btn.textContent = 'Enter';
+      btn.disabled = false;
+    });
+  </script>
+</body>
+</html>
