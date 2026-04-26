@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Discover — Lejla Krstic</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="auth.js"></script>
+  <script>requireAuth();</script>
+  <style>
+    .page-header {
+      padding: 60px 0 40px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── RESULTS GRID ── */
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      padding: 40px 0 180px;
+    }
+
+    /* ── BRAND CARDS ── */
+    .brand-card {
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .brand-card:hover {
+      border-color: var(--gold);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+    }
+    .brand-card-top {
+      padding: 24px 24px 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    .brand-logo {
+      width: 48px; height: 48px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; flex-shrink: 0;
+    }
+    .brand-meta { flex: 1; }
+    .brand-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px; line-height: 1; margin-bottom: 4px;
+    }
+    .brand-country { font-size: 12px; color: var(--text-light); }
+    .brand-category-chip {
+      font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 3px 8px; background: var(--surface);
+      color: var(--text-mid); border: 1px solid var(--border);
+    }
+    .brand-card-body { padding: 0 24px 16px; flex: 1; }
+    .brand-desc { font-size: 13px; color: var(--text-mid); line-height: 1.6; }
+    .brand-why {
+      margin-top: 10px; font-size: 12px; color: var(--sage);
+      line-height: 1.5; display: flex; gap: 6px;
+    }
+    .brand-why::before { content: '✦'; flex-shrink: 0; font-size: 10px; margin-top: 1px; }
+    .fit-dots { display: flex; gap: 3px; margin-top: 12px; }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); }
+    .dot.filled { background: var(--gold); }
+    .brand-card-footer {
+      padding: 14px 24px; border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    }
+    .brand-ig { font-size: 12px; color: var(--text-light); }
+    .add-btn {
+      font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 6px 14px; border: 1px solid var(--border);
+      background: transparent; color: var(--text-mid);
+      cursor: pointer; transition: all 0.15s; font-family: 'Jost', sans-serif;
+      white-space: nowrap;
+    }
+    .add-btn:hover { background: var(--text); color: var(--bg); border-color: var(--text); }
+    .add-btn.added { background: var(--sage); color: #fff; border-color: var(--sage); }
+
+    /* ── STATES ── */
+    .empty-state {
+      grid-column: 1/-1; text-align: center; padding: 80px 20px;
+    }
+    .loading-state {
+      grid-column: 1/-1; text-align: center; padding: 80px 20px;
+      color: var(--text-light);
+    }
+    .loading-dot {
+      display: inline-block; width: 8px; height: 8px;
+      border-radius: 50%; background: var(--gold);
+      margin: 0 3px;
+      animation: ldpulse 1.2s ease-in-out infinite;
+    }
+    .loading-dot:nth-child(2) { animation-delay: 0.2s; }
+    .loading-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes ldpulse {
+      0%, 100% { opacity: 0.3; transform: scale(0.8); }
+      50%       { opacity: 1;   transform: scale(1); }
+    }
+
+    /* ── CHAT BAR ── */
+    .chat-bar {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 80;
+      background: rgba(253,250,247,0.97);
+      backdrop-filter: blur(8px);
+      border-top: 1px solid var(--border);
+    }
+    .chat-bar-inner {
+      max-width: 1200px; margin: 0 auto;
+      padding: 16px 40px 20px;
+    }
+    .quick-prompts {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;
+    }
+    .quick-chip {
+      padding: 5px 13px; font-size: 12px; letter-spacing: 0.04em;
+      border: 1px solid var(--border); background: transparent;
+      color: var(--text-mid); cursor: pointer; font-family: 'Jost', sans-serif;
+      transition: all 0.15s;
+    }
+    .quick-chip:hover { border-color: var(--gold); color: var(--text); }
+    .chat-row { display: flex; gap: 10px; align-items: center; }
+    .chat-input {
+      flex: 1; padding: 12px 18px; font-size: 14px;
+      border: 1px solid var(--border); background: var(--bg);
+      color: var(--text); outline: none; font-family: 'Jost', sans-serif;
+    }
+    .chat-input:focus { border-color: var(--gold); }
+    .chat-input::placeholder { color: var(--text-light); }
+    .settings-btn {
+      width: 42px; height: 42px; background: none;
+      border: 1px solid var(--border); color: var(--text-mid);
+      font-size: 17px; display: flex; align-items: center;
+      justify-content: center; flex-shrink: 0; transition: all 0.15s;
+    }
+    .settings-btn:hover { border-color: var(--gold); color: var(--text); }
+    .api-status {
+      font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
+      color: var(--text-light); margin-left: 4px; white-space: nowrap;
+    }
+    .api-status.set { color: var(--sage); }
+
+    @media (max-width: 900px) {
+      .results-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .results-grid { grid-template-columns: 1fr; }
+      .chat-bar-inner { padding: 12px 20px 16px; }
+      .quick-prompts { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" class="nav-brand">Lejla <span>Krstic</span></a>
+  <div class="nav-links">
+    <a href="index.html">Hub</a>
+    <a href="media-kit.html" target="_blank">Media Kit</a>
+    <a href="brands.html">Brands</a>
+    <a href="outreach.html">Outreach</a>
+    <a href="discover.html" class="active">AI Discover</a>
+  </div>
+</nav>
+
+<div class="page-wrap">
+  <div class="page-header">
+    <div class="container">
+      <p class="eyebrow">Powered by Claude AI</p>
+      <h1 class="section-title">Brand Discovery</h1>
+      <p style="color:var(--text-mid);font-size:16px;max-width:560px;line-height:1.7;">
+        Describe what you're looking for and Claude will find brands matched to your aesthetic, audience, and current projects — ready to add to your pipeline.
+      </p>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="results-grid" id="resultsGrid">
+      <div class="empty-state">
+        <p style="font-family:'Cormorant Garamond',serif;font-size:36px;color:var(--text-mid);margin-bottom:16px;">What are you looking for?</p>
+        <p style="font-size:14px;color:var(--text-light);max-width:420px;margin:0 auto;line-height:1.7;">
+          Try <em>"outdoor kitchen brands in Germany"</em> or <em>"premium dryer brands DACH"</em> — Claude evaluates brands for your audience and aesthetic, then surfaces the best fits.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── CHAT BAR ── -->
+<div class="chat-bar">
+  <div class="chat-bar-inner">
+    <div class="quick-prompts" id="quickPrompts">
+      <button class="quick-chip" onclick="usePrompt('Premium outdoor kitchen brands available in Germany')">Outdoor kitchens · DE</button>
+      <button class="quick-chip" onclick="usePrompt('High-end washing machine or dryer brands for DACH region')">Appliances · DACH</button>
+      <button class="quick-chip" onclick="usePrompt('Luxury garden furniture brands shipping to Germany')">Garden furniture · EU</button>
+      <button class="quick-chip" onclick="usePrompt('Premium smart home and automation brands in Germany')">Smart home · DE</button>
+      <button class="quick-chip" onclick="usePrompt('High-end bathroom brands available in DACH region')">Bathroom · DACH</button>
+      <button class="quick-chip" onclick="usePrompt('Sustainable outdoor lighting brands in Europe')">Outdoor lighting · EU</button>
+    </div>
+    <div class="chat-row">
+      <input type="text" class="chat-input" id="chatInput"
+        placeholder="Describe the brand category you are looking for…" />
+      <button class="btn btn-primary" onclick="discover()" id="discoverBtn">Find Brands</button>
+      <button class="settings-btn" onclick="openSettings()" title="API Key Settings">⚙</button>
+      <span class="api-status" id="apiStatus">No key</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── SETTINGS MODAL ── -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal" style="max-width:520px;">
+    <button class="modal-close" onclick="closeSettings()">×</button>
+    <div class="modal-title">Claude API Key</div>
+    <p style="color:var(--text-mid);font-size:14px;line-height:1.7;margin-bottom:24px;">
+      Your key is stored only in this browser and sent directly to Anthropic — never to any other server.
+      Get yours at <a href="https://console.anthropic.com" target="_blank" style="color:var(--gold);">console.anthropic.com</a> → API Keys, then add a small credit balance to activate it.
+    </p>
+    <div class="form-group">
+      <label class="form-label">Anthropic API Key</label>
+      <input type="password" class="form-control" id="apiKeyInput" placeholder="sk-ant-…" />
+    </div>
+    <div style="display:flex;gap:12px;margin-top:8px;">
+      <button class="btn btn-primary w-full" onclick="saveApiKey()">Save Key</button>
+      <button class="btn btn-outline" onclick="clearApiKey()" style="white-space:nowrap;">Clear</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── ADD TO PIPELINE MODAL ── -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal" style="max-width:520px;">
+    <button class="modal-close" onclick="closeAddModal()">×</button>
+    <div class="modal-title" id="addModalTitle"></div>
+    <p style="color:var(--text-mid);font-size:13px;margin-bottom:24px;" id="addModalMeta"></p>
+    <div class="form-group">
+      <label class="form-label">Contact Email</label>
+      <input type="email" class="form-control" id="addEmail" placeholder="press@brand.com" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <textarea class="form-control" id="addNotes" rows="3"
+        placeholder="Contact tips, product ideas, specific person to reach…"></textarea>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:8px;">
+      <button class="btn btn-primary w-full" onclick="confirmAdd()">Add to Pipeline</button>
+      <button class="btn btn-outline" onclick="closeAddModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API_KEY_STORAGE = 'hm_anthropic_key';
+const MODEL = 'claude-haiku-4-5';
+
+const SYSTEM_PROMPT = `You are a brand partnership advisor for @haus_momster.
+
+CREATOR PROFILE:
+- Lejla Krstic — Architect, Interior Designer & Content Creator
+- Instagram: @haus_momster
+- 65,000 followers | 991,000 monthly reach | 4.5% monthly follower growth
+- Audience: 86% female, aged 25–55, Germany is #1 market (22.2%), also strong in Australia, Netherlands, Italy
+- Aesthetic: premium, architectural, atmospheric, editorial — "reduced, precise, material-driven"
+- Currently: designing and renovating a 2,350 sqm garden (this year — outdoor brands highly relevant), 2 children
+- Content themes: architecture, interior design, home renovation, outdoor living, smart home, family life
+
+TASK:
+When given a brand category or search query, return 5 brand suggestions that are a strong collaboration fit.
+
+BRAND SELECTION CRITERIA:
+- Available and shipping in the DACH region (Germany, Austria, Switzerland) — EU brands preferred to avoid customs
+- Design-forward, premium positioning — not mass market
+- Relevant to her current garden project where applicable
+- Brands with existing creator or influencer programs are a plus
+
+Return a JSON array of exactly 5 brand objects. Each object must have ALL of these fields:
+[
+  {
+    "name": "Brand Name",
+    "category": "Use one of: Kitchen & Cooking / Home & Furniture / Lighting / Materials & Surfaces / Outdoor & Garden / Lifestyle & Fragrance / Tableware & Glass / Art & Prints / Tech & Wellness — or create a new accurate category",
+    "country": "🇩🇪 Germany",
+    "website": "brand.com",
+    "instagram": "@handle",
+    "ig_followers": "200K",
+    "desc": "One to two sentences describing the brand.",
+    "why": "One to two sentences explaining specifically why this brand fits @haus_momster and her audience.",
+    "fit": 5,
+    "emoji": "🔲",
+    "contactEmail": "press@brand.com",
+    "contactHint": "One sentence on how to best contact them for collaborations."
+  }
+]
+
+Rules:
+- Return ONLY the raw JSON array. No markdown, no code blocks, no explanation.
+- Start your response with [ and end with ]
+- fit score is 1–5 (integer)
+- emoji should be a single relevant emoji character
+- Make contactEmail a realistic guess based on the brand`;
+
+let currentBrands = [];
+let selectedBrandIdx = null;
+
+// ── API KEY ──────────────────────────────────────────────────────────────
+
+function getApiKey() {
+  return localStorage.getItem(API_KEY_STORAGE) || '';
+}
+
+function updateApiStatus() {
+  const key = getApiKey();
+  const el = document.getElementById('apiStatus');
+  if (key) {
+    el.textContent = '✓ Key set';
+    el.className = 'api-status set';
+  } else {
+    el.textContent = 'No key';
+    el.className = 'api-status';
+  }
+}
+
+function openSettings() {
+  document.getElementById('apiKeyInput').value = getApiKey();
+  document.getElementById('settingsModal').classList.add('open');
+}
+
+function closeSettings() {
+  document.getElementById('settingsModal').classList.remove('open');
+}
+
+function saveApiKey() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (!key) { showToast('Please enter a key'); return; }
+  localStorage.setItem(API_KEY_STORAGE, key);
+  closeSettings();
+  updateApiStatus();
+  showToast('API key saved');
+}
+
+function clearApiKey() {
+  localStorage.removeItem(API_KEY_STORAGE);
+  document.getElementById('apiKeyInput').value = '';
+  updateApiStatus();
+  showToast('API key cleared');
+}
+
+// ── DISCOVER ─────────────────────────────────────────────────────────────
+
+function usePrompt(text) {
+  document.getElementById('chatInput').value = text;
+  document.getElementById('chatInput').focus();
+}
+
+async function discover() {
+  const query = document.getElementById('chatInput').value.trim();
+  if (!query) { showToast('Please describe what you are looking for'); return; }
+
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    showToast('Add your API key first');
+    openSettings();
+    return;
+  }
+
+  const btn = document.getElementById('discoverBtn');
+  btn.textContent = 'Searching…';
+  btn.disabled = true;
+  setLoading();
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: 2048,
+        system: SYSTEM_PROMPT,
+        messages: [{ role: 'user', content: query }]
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      if (res.status === 401) throw new Error('Invalid API key — check your key in settings');
+      if (res.status === 429) throw new Error('Rate limited — wait a moment and try again');
+      if (res.status === 400) throw new Error(err.error?.message || 'Bad request — try rephrasing');
+      throw new Error(err.error?.message || `API error ${res.status}`);
+    }
+
+    const data = await res.json();
+    const rawText = data.content?.[0]?.text || '';
+
+    // Extract JSON array robustly — handle possible markdown wrapping
+    const match = rawText.match(/\[[\s\S]*\]/);
+    if (!match) throw new Error('Unexpected response format — try rephrasing your request');
+
+    let brands;
+    try {
+      brands = JSON.parse(match[0]);
+    } catch {
+      throw new Error('Could not parse results — try rephrasing your request');
+    }
+
+    if (!Array.isArray(brands) || brands.length === 0) {
+      throw new Error('No brands found — try a different category or region');
+    }
+
+    currentBrands = brands;
+    renderBrands(brands);
+
+  } catch (err) {
+    showError(err.message || 'Something went wrong');
+  } finally {
+    btn.textContent = 'Find Brands';
+    btn.disabled = false;
+  }
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────
+
+function setLoading() {
+  document.getElementById('resultsGrid').innerHTML = `
+    <div class="loading-state">
+      <div style="margin-bottom:16px;">
+        <span class="loading-dot"></span>
+        <span class="loading-dot"></span>
+        <span class="loading-dot"></span>
+      </div>
+      <p style="font-size:13px;">Claude is researching brands for you…</p>
+    </div>`;
+}
+
+function showError(msg) {
+  document.getElementById('resultsGrid').innerHTML = `
+    <div class="empty-state">
+      <p style="color:var(--rose);font-size:15px;margin-bottom:8px;">Something went wrong</p>
+      <p style="font-size:13px;color:var(--text-light);">${msg}</p>
+    </div>`;
+}
+
+function getOutreachNames() {
+  const outreach = JSON.parse(localStorage.getItem('outreach') || '[]');
+  return new Set(outreach.map(o => (o.brandName || '').toLowerCase()));
+}
+
+function fitDots(score) {
+  let html = '';
+  for (let i = 1; i <= 5; i++) {
+    html += `<span class="dot${i <= score ? ' filled' : ''}"></span>`;
+  }
+  return html;
+}
+
+function renderBrands(brands) {
+  const inPipeline = getOutreachNames();
+  document.getElementById('resultsGrid').innerHTML = brands.map((b, i) => {
+    const added = inPipeline.has((b.name || '').toLowerCase());
+    const catShort = (b.category || '').split(' & ')[0];
+    return `<div class="brand-card">
+      <div class="brand-card-top">
+        <div class="brand-logo">${b.emoji || '◎'}</div>
+        <div class="brand-meta">
+          <div class="brand-name">${b.name || '—'}</div>
+          <div class="brand-country">${b.country || ''}</div>
+        </div>
+        <span class="brand-category-chip">${catShort}</span>
+      </div>
+      <div class="brand-card-body">
+        <p class="brand-desc">${b.desc || ''}</p>
+        <p class="brand-why">${b.why || ''}</p>
+        <div class="fit-dots" title="Aesthetic fit score">${fitDots(b.fit || 4)}</div>
+      </div>
+      <div class="brand-card-footer">
+        <span class="brand-ig">${b.instagram || ''} · ${b.ig_followers || ''}</span>
+        <button class="add-btn${added ? ' added' : ''}"
+          onclick="openAddModal(${i})">
+          ${added ? '✓ In Pipeline' : '+ Outreach'}
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── ADD TO PIPELINE ───────────────────────────────────────────────────────
+
+function openAddModal(idx) {
+  selectedBrandIdx = idx;
+  const b = currentBrands[idx];
+  if (!b) return;
+  document.getElementById('addModalTitle').textContent = b.name;
+  document.getElementById('addModalMeta').textContent =
+    `${b.country || ''} · ${b.category || ''} · ${b.website || ''}`;
+  document.getElementById('addEmail').value = b.contactEmail || '';
+  document.getElementById('addNotes').value = b.contactHint || '';
+  document.getElementById('addModal').classList.add('open');
+}
+
+function closeAddModal() {
+  document.getElementById('addModal').classList.remove('open');
+  selectedBrandIdx = null;
+}
+
+function confirmAdd() {
+  if (selectedBrandIdx === null) return;
+  const b = currentBrands[selectedBrandIdx];
+  if (!b) return;
+
+  const outreach = JSON.parse(localStorage.getItem('outreach') || '[]');
+
+  if (outreach.find(o => (o.brandName || '').toLowerCase() === (b.name || '').toLowerCase())) {
+    closeAddModal();
+    showToast(`${b.name} is already in your pipeline`);
+    return;
+  }
+
+  const entry = {
+    id: Date.now().toString(),
+    brandName: b.name,
+    brandCategory: b.category,
+    brandCountry: b.country,
+    brandInstagram: b.instagram,
+    templateType: 'outdoor',
+    emailHint: b.why,
+    contactEmail: document.getElementById('addEmail').value.trim(),
+    notes: document.getElementById('addNotes').value.trim(),
+    status: 'new',
+    addedDate: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  outreach.push(entry);
+  localStorage.setItem('outreach', JSON.stringify(outreach));
+
+  closeAddModal();
+  showToast(`${b.name} added to pipeline`);
+  renderBrands(currentBrands);
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+
+document.addEventListener('DOMContentLoaded', () => {
+  updateApiStatus();
+
+  document.getElementById('chatInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') discover();
+  });
+
+  document.getElementById('settingsModal').addEventListener('click', e => {
+    if (e.target === document.getElementById('settingsModal')) closeSettings();
+  });
+  document.getElementById('addModal').addEventListener('click', e => {
+    if (e.target === document.getElementById('addModal')) closeAddModal();
+  });
+});
+</script>
+</body>
+</html>
