@@ -203,7 +203,7 @@
     </div>
     <div class="chat-row">
       <input type="text" class="chat-input" id="chatInput"
-        placeholder="Describe the brand category you are looking for…" />
+        placeholder='Try "Navimow" or "robot mowers Germany" or "premium dryers DACH"…' />
       <button class="btn btn-primary" onclick="discover()" id="discoverBtn">Find Brands</button>
       <button class="settings-btn" onclick="openSettings()" title="API Key Settings">⚙</button>
       <span class="api-status" id="apiStatus">No key</span>
@@ -271,7 +271,11 @@ CREATOR PROFILE:
 - Content themes: architecture, interior design, home renovation, outdoor living, smart home, family life
 
 TASK:
-When given a brand category or search query, return 5 brand suggestions that are a strong collaboration fit.
+No matter how the user phrases their request — whether they name a specific brand, ask about a category, or say they want to "reach out to X" — always return brand suggestions as a JSON array.
+
+- If the user mentions a SPECIFIC brand by name (e.g. "Navimow", "reach out to Miele"): return that brand as the first entry, plus 4 similar brands.
+- If the user describes a CATEGORY: return 5 brands that fit.
+- If the user asks to "craft an email" or "reach out": still return the brand(s) as JSON — email drafting happens separately.
 
 BRAND SELECTION CRITERIA:
 - Available and shipping in the DACH region (Germany, Austria, Switzerland) — EU brands preferred to avoid customs
@@ -297,9 +301,9 @@ Return a JSON array of exactly 5 brand objects. Each object must have ALL of the
   }
 ]
 
-Rules:
-- Return ONLY the raw JSON array. No markdown, no code blocks, no explanation.
-- Start your response with [ and end with ]
+CRITICAL RULES:
+- Return ONLY the raw JSON array. No markdown, no code blocks, no explanation text whatsoever.
+- Your entire response must start with [ and end with ]
 - fit score is 1–5 (integer)
 - emoji should be a single relevant emoji character
 - Make contactEmail a realistic guess based on the brand`;
