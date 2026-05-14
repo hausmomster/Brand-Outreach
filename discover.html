@@ -472,8 +472,7 @@ function renderBrands(brands) {
   document.getElementById('resultsGrid').innerHTML = brands.map((b, i) => {
     const added = inPipeline.has((b.name || '').toLowerCase());
     const catShort = (b.category || '').split(' & ')[0];
-    const website = b.website ? (b.website.startsWith('http') ? b.website : 'https://' + b.website) : null;
-    return `<div class="brand-card"${website ? ` onclick="window.open('${website}','_blank')"` : ''}>
+    return `<div class="brand-card" onclick="openBrandSite(${i})">
       <div class="brand-card-top">
         <div class="brand-logo">${b.emoji || '◎'}</div>
         <div class="brand-meta">
@@ -496,6 +495,16 @@ function renderBrands(brands) {
       </div>
     </div>`;
   }).join('');
+}
+
+// ── OPEN BRAND SITE ──────────────────────────────────────────────────────
+
+function openBrandSite(idx) {
+  const b = currentBrands[idx];
+  if (!b) return;
+  const website = b.website ? (b.website.startsWith('http') ? b.website : 'https://' + b.website) : null;
+  const url = website || 'https://www.google.com/search?q=' + encodeURIComponent(b.name + ' official website');
+  window.open(url, '_blank');
 }
 
 // ── ADD TO PIPELINE ───────────────────────────────────────────────────────
