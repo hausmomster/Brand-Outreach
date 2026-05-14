@@ -32,6 +32,7 @@
       border-color: var(--gold);
       box-shadow: 0 4px 20px rgba(0,0,0,0.07);
     }
+    .brand-card { cursor: pointer; }
     .brand-card-top {
       padding: 24px 24px 16px;
       display: flex;
@@ -471,7 +472,8 @@ function renderBrands(brands) {
   document.getElementById('resultsGrid').innerHTML = brands.map((b, i) => {
     const added = inPipeline.has((b.name || '').toLowerCase());
     const catShort = (b.category || '').split(' & ')[0];
-    return `<div class="brand-card">
+    const website = b.website ? (b.website.startsWith('http') ? b.website : 'https://' + b.website) : null;
+    return `<div class="brand-card"${website ? ` onclick="window.open('${website}','_blank')"` : ''}>
       <div class="brand-card-top">
         <div class="brand-logo">${b.emoji || '◎'}</div>
         <div class="brand-meta">
@@ -488,7 +490,7 @@ function renderBrands(brands) {
       <div class="brand-card-footer">
         <span class="brand-ig">${b.instagram || ''} · ${b.ig_followers || ''}</span>
         <button class="add-btn${added ? ' added' : ''}"
-          onclick="openAddModal(${i})">
+          onclick="event.stopPropagation(); openAddModal(${i})">
           ${added ? '✓ In Pipeline' : '+ Outreach'}
         </button>
       </div>
