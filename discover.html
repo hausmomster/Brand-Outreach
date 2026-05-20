@@ -526,6 +526,22 @@ function closeAddModal() {
   selectedBrandIdx = null;
 }
 
+function categoryToTemplateType(category) {
+  const c = (category || '').toLowerCase();
+  if (c.includes('outdoor') && (c.includes('cook') || c.includes('grill') || c.includes('pizza') || c.includes('bbq'))) return 'outdoor-cooking';
+  if (c.includes('outdoor') || c.includes('garden')) return 'outdoor';
+  if (c.includes('kitchen') || c.includes('cooking') || c.includes('appliance')) return 'kitchen-appliance';
+  if (c.includes('cookware')) return 'cookware';
+  if (c.includes('furniture') || c.includes('home')) return 'furniture';
+  if (c.includes('lighting') || c.includes('light')) return 'lighting';
+  if (c.includes('material') || c.includes('surface')) return 'materials';
+  if (c.includes('tableware') || c.includes('glass') || c.includes('ceramic')) return 'tableware';
+  if (c.includes('art') || c.includes('print')) return 'art';
+  if (c.includes('tech') || c.includes('wellness') || c.includes('platform')) return 'platform';
+  if (c.includes('lifestyle') || c.includes('fragrance')) return 'lifestyle';
+  return 'lifestyle';
+}
+
 function confirmAdd() {
   if (selectedBrandIdx === null) return;
   const b = currentBrands[selectedBrandIdx];
@@ -545,7 +561,7 @@ function confirmAdd() {
     brandCategory: b.category,
     brandCountry: b.country,
     brandInstagram: b.instagram,
-    templateType: 'outdoor',
+    templateType: categoryToTemplateType(b.category),
     emailHint: b.why,
     contactEmail: document.getElementById('addEmail').value.trim(),
     notes: document.getElementById('addNotes').value.trim(),
