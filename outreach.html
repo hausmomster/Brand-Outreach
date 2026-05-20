@@ -316,20 +316,31 @@ const TEMPLATES = {
   initial: {
     subject: (brand) => `Collaboration Inquiry — @haus_momster x ${brand.brandName}`,
     body: (brand) => {
-      const typeLines = {
-        "outdoor-cooking": `My husband and I deeply value the feeling of home and community — especially our outdoor gatherings and pizza evenings, which resonate authentically with my audience.`,
-        "kitchen-appliance": `The kitchen is the heart of the home — and the way appliances are designed directly shapes how a space feels and functions. That intersection is central to my work.`,
-        "cookware": `Cookware is where design and function truly meet — beautiful objects that are used, touched, and lived with every day. That authenticity is what my audience connects with.`,
-        "furniture": `Furniture defines the architecture of daily life. I believe in showing pieces within real, designed environments rather than staged settings — the way an object genuinely shapes a room.`,
-        "lighting": `Light is the most transformative element in any interior. The right fixture doesn't just illuminate — it defines the entire atmosphere of a space.`,
-        "materials": `Surfaces and materials form the foundation of every interior I design. The tactile, visual quality of materials is something my audience has a deep appreciation for.`,
-        "outdoor": `Outdoor spaces deserve the same design intentionality as interiors. The materials, objects, and atmosphere of an outdoor space can be just as transformative.`,
-        "lifestyle": `Objects of everyday use — the ones we reach for each morning — say something profound about how we choose to live. That considered approach resonates deeply with my community.`,
-        "tableware": `The table is one of the most social and atmospheric spaces in a home. The objects on it — glassware, ceramics, cutlery — are as much design as they are functional.`,
-        "art": `Art is perhaps the most personal element of an interior — the thing that most reveals a person's sensibility and transforms a space into a home.`,
-        "platform": `As an interior designer and content creator, I curate carefully — and my audience trusts that curation. I'm interested in genuine partnerships with brands that align with that trust.`,
+      const craftPhrases = {
+        "outdoor-cooking": "craft and the way outdoor cooking creates real moments of connection",
+        "kitchen-appliance": "quality, precision, and considered design",
+        "cookware": "materiality and craftsmanship — objects that are used, touched, and lived with every day",
+        "furniture": "materiality and considered form",
+        "lighting": "the way light defines atmosphere and space",
+        "materials": "materiality, texture, and surface quality",
+        "outdoor": "design and quality of outdoor living",
+        "lifestyle": "considered design in everyday objects",
+        "tableware": "the craft and beauty you bring to the table",
+        "art": "the role of art in transforming a space into a home",
+        "platform": "design and quality",
       };
-      const personalLine = typeLines[brand.templateType] || `Your brand's commitment to quality and design language is something I genuinely admire.`;
+      const craftPhrase = craftPhrases[brand.templateType] || "design, quality, and craft";
+
+      // emailHint is the AI-generated "why this brand fits @haus_momster" — specific to each brand
+      const brandFit = brand.emailHint
+        ? brand.emailHint
+        : `Your brand's commitment to quality and design language resonates with the aesthetic I work within.`;
+
+      // Add current garden project context for outdoor-relevant categories
+      const outdoorCategories = ['outdoor', 'outdoor-cooking', 'furniture', 'garden'];
+      const projectNote = outdoorCategories.includes(brand.templateType)
+        ? `\n\nI'm currently designing a 2,350 sqm garden — outdoor living is one of my most active content themes right now, which makes the timing for a collaboration particularly relevant.`
+        : '';
 
       return `Dear ${brand.brandName} Team,
 
@@ -337,7 +348,7 @@ I hope this message finds you well.
 
 My name is Lejla Krstic, and I'm an interior designer and content creator at @haus_momster — a community of 68,800 design-focused followers, primarily based in the DACH region. My work centres on creating refined, atmospheric spaces that balance materiality, light, and function: real environments that tell a story.
 
-I've been following ${brand.brandName} and am genuinely drawn to how you approach [design / quality / craft]. ${personalLine}
+I've been following ${brand.brandName} and am genuinely drawn to how you approach ${craftPhrase}. ${brandFit}${projectNote}
 
 I would love to explore a collaboration that integrates your product into a fully styled, designed context — concept-led rather than product-led. My focus would be on:
 
