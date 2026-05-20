@@ -282,6 +282,22 @@
       <input type="email" class="form-control" id="editEmail">
     </div>
     <div class="form-group">
+      <label class="form-label">Email Template</label>
+      <select class="form-control" id="editTemplateType">
+        <option value="outdoor-cooking">Outdoor Cooking</option>
+        <option value="kitchen-appliance">Kitchen & Appliances</option>
+        <option value="cookware">Cookware</option>
+        <option value="furniture">Furniture & Home</option>
+        <option value="lighting">Lighting</option>
+        <option value="materials">Materials & Surfaces</option>
+        <option value="outdoor">Outdoor & Garden</option>
+        <option value="lifestyle">Lifestyle & Fragrance</option>
+        <option value="tableware">Tableware & Glass</option>
+        <option value="art">Art & Prints</option>
+        <option value="platform">Tech & Wellness</option>
+      </select>
+    </div>
+    <div class="form-group">
       <label class="form-label">Follow-up Reminder Date</label>
       <input type="date" class="form-control" id="editFollowup">
     </div>
@@ -569,6 +585,7 @@ function openEditModal(id) {
   editingId = id;
   document.getElementById('editBrandName').textContent = entry.brandName;
   document.getElementById('editEmail').value = entry.contactEmail || '';
+  document.getElementById('editTemplateType').value = entry.templateType || 'lifestyle';
   document.getElementById('editFollowup').value = entry.followUpDate || '';
   document.getElementById('editNotes').value = entry.notes || '';
   document.getElementById('editModal').classList.add('open');
@@ -584,6 +601,7 @@ function saveEdit() {
   const idx = outreach.findIndex(o => o.id === editingId);
   if (idx === -1) return;
   outreach[idx].contactEmail = document.getElementById('editEmail').value.trim();
+  outreach[idx].templateType = document.getElementById('editTemplateType').value;
   outreach[idx].followUpDate = document.getElementById('editFollowup').value;
   outreach[idx].notes = document.getElementById('editNotes').value.trim();
   outreach[idx].updatedAt = new Date().toISOString();
